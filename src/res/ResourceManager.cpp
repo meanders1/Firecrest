@@ -44,7 +44,7 @@ fc::res::ShaderHandle fc::res::ResourceManager::loadShader(const std::string& ve
         }
     }
 
-    const auto shader = std::make_shared<gl::Shader>(vertexPath, fragmentPath);
+    const auto shader = std::make_shared<gl::Shader>(gl::Shader::fileSource(vertexPath), gl::Shader::fileSource(fragmentPath));
     _shaders[key] = shader;
     return shader;
 }

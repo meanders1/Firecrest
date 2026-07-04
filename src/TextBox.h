@@ -16,9 +16,9 @@ public:
             float textSize, const std::string& text, ShapeRenderer2D& boxRenderer,
             TextRenderer& textRenderer)
         : Container(alignment),
-          background(createChild<ColoredRect>(alignment::ElementAlignment(), backgroundColor,
-                                               boxRenderer)),
-          text(createChild<Text>(alignment, textColor, textSize, text, textRenderer)) {
+          background(createChild<ColoredRect>(alignment::ElementAlignment(), backgroundColor)),
+          text(createChild<Text>(alignment, textColor, textSize, text, textRenderer))
+    {
         this->alignment.setX(alignment.x);
         this->alignment.setY(alignment.y);
         this->alignment.setWidth(alignment::MirrorWidth(this->text));

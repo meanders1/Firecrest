@@ -19,7 +19,8 @@ public:
         : Container(alignment),
           camera(std::make_unique<FreeCamera>()),
           background(createChild<ColoredRect>(alignment::ElementAlignment(),
-                                              glm::vec4(0.05, 0.05, 0.05, 1), renderer)) {
+                                              glm::vec4(0.05, 0.05, 0.05, 1)))
+    {
         focusable = true;
     }
 
@@ -42,7 +43,8 @@ public:
         gl::RenderRegion::pop();
     }
 
-    virtual void onKeyboardEvent(Input& input, input::KeyboardEvent event) override {
+    virtual void onKeyboardEvent(Input& input, input::KeyboardEvent event) override
+    {
         if (event.action == input::KeyAction::Press && event.key == GLFW_KEY_ESCAPE) {
             unFocus();
         }

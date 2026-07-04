@@ -16,8 +16,8 @@ public:
     Graph(alignment::ElementAlignment alignment, ShapeRenderer2D& shapeRenderer,
           TextRenderer& textRenderer, float textSize)
         : Container(alignment),
-          background(createChild<ColoredRect>(alignment::ElementAlignment(), glm::vec4(0, 0, 0, 1),
-                                              shapeRenderer)),
+          background(
+              createChild<ColoredRect>(alignment::ElementAlignment(), glm::vec4(0, 0, 0, 1))),
           graph(createChild<PlainGraph>(
               alignment::ElementAlignment()
                   .setHeight([textSize, this](float parent1, float parent2) {

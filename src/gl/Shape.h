@@ -30,10 +30,10 @@ public:
 
     Shape();
     Shape(const std::vector<VertexT>& vertices, const std::vector<GLuint>& indices,
-          GLenum drawMode_ = GL_TRIANGLES);
+          GLenum usage = GL_STATIC_DRAW, GLenum drawMode = GL_TRIANGLES);
 
     void setVertices(const std::vector<VertexT>& vertices, const std::vector<GLuint>& indices,
-                     GLenum drawMode = GL_TRIANGLES);
+                     GLenum usage = GL_STATIC_DRAW, GLenum drawMode = GL_TRIANGLES);
 };
 
 // === Implementation ===
@@ -75,18 +75,19 @@ Shape<VertexT>::Shape() : drawMode(GL_TRIANGLES)
 
 template <VertexType VertexT>
 Shape<VertexT>::Shape(const std::vector<VertexT>& vertices, const std::vector<GLuint>& indices,
-                      GLenum drawMode)
+                      GLenum usage, GLenum drawMode)
     : Shape()
 {
-    setVertices(vertices, indices, drawMode);
+    setVertices(vertices, indices, usage, drawMode);
 }
 
 template <VertexType VertexT>
 void Shape<VertexT>::setVertices(const std::vector<VertexT>& vertices,
-                                 const std::vector<GLuint>& indices, GLenum drawMode)
+                                 const std::vector<GLuint>& indices, GLenum usage,
+                                 GLenum drawMode)
 {
     this->drawMode = drawMode;
-    vbo.setData(vertices.data(), sizeof(VertexT) * vertices.size(), drawMode);
+    vbo.setData(vertices.data(), sizeof(VertexT) * vertices.size(), usage);
     ibo.setIndices(indices.data(), indices.size());
 }
 

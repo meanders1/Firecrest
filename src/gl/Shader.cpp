@@ -7,50 +7,16 @@
 
 namespace fc::gl {
 
-std::string getShaderText(const std::string& filePath)
+Shader::Shader(const std::string& vertexSource, const std::string& fragmentSource)
 {
-    std::ifstream stream(filePath);
-
-    std::string line;
-    std::stringstream ss;
-
-    if (!stream.good()) {
-        std::cout << "Failed to load shader. Path: \"" << filePath << "\"\n";
-    }
-
-    while (getline(stream, line)) {
-        // File including other file
-        if (line.rfind("#include", 0) == 0) {
-            line.erase(0, line.find_first_of("\"<"));
-            utils::trim(line);
-            line.pop_back();
-
-            // "line" is the path of the file. Example: "folder/file.txt"
-
-            std::string thisPath
-                = utils::getPath(filePath); // The path to this file. Example: "res/shaders/"
-            std::string includeFile = thisPath + line;
-            std::string includeText = getShaderText(includeFile);
-            ss << includeText << "\n";
-        }
-        else {
-            ss << line << '\n';
-        }
-    }
-
-    return ss.str();
-}
-
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
-{
-    addStage(GL_VERTEX_SHADER, vertexPath);
-    addStage(GL_FRAGMENT_SHADER, fragmentPath);
+    addStageSource(GL_VERTEX_SHADER, vertexSource);
+    addStageSource(GL_FRAGMENT_SHADER, fragmentSource);
     link();
 }
 
 void Shader::addStage(const GLenum shaderType, const std::string& filePath)
 {
-    std::string source = getShaderText(filePath);
+    std::string source = fileSource(filePath);
     addStageSource(shaderType, source);
 }
 
@@ -325,6 +291,39 @@ void Shader::setUniformMat4x3f(const std::string& name, const glm::mat4x3& matri
 bool Shader::uniformExists(const std::string& name)
 {
     return getUniformLocation(name, false) != -1;
+}
+
+std::string Shader::fileSource(const std::string& filePath) {
+    std::ifstream stream(filePath);
+
+    std::string line;
+    std::stringstream ss;
+
+    if (!stream.good()) {
+        std::cout << "Failed to load shader. Path: \"" << filePath << "\"\n";
+    }
+
+    while (getline(stream, line)) {
+        // File including other file
+        if (line.rfind("#include", 0) == 0) {
+            line.erase(0, line.find_first_of("\"<"));
+            utils::trim(line);
+            line.pop_back();
+
+            // "line" is the path of the file. Example: "folder/file.txt"
+
+            std::string thisPath
+                = utils::getPath(filePath); // The path to this file. Example: "res/shaders/"
+            std::string includeFile = thisPath + line;
+            std::string includeText = fileSource(includeFile);
+            ss << includeText << "\n";
+        }
+        else {
+            ss << line << '\n';
+        }
+    }
+
+    return ss.str();
 }
 
 GLint Shader::getUniformLocation(const std::string& name, bool warn) const
