@@ -2,6 +2,7 @@
 #include "Color.h"
 #include "Element.h"
 #include "ShapeRenderer2D.h"
+#include "animation/Animatable.h"
 #include "gl/Painter.h"
 #include "gl/Shape.h"
 #include "glm/gtc/matrix_transform.hpp"
@@ -48,7 +49,7 @@ public:
     };
 
 public:
-    Color color;
+    animation::Animatable<Color> color;
 
     gl::Shape<Vertex> shape;
     gl::Painter<Vertex> painter;
@@ -64,8 +65,8 @@ public:
 
                       const glm::mat4 ortho = window.orthographicProjection();
                       shader.setUniformMat4f("uProjection", ortho);
-                      shader.setUniform4f("uColor", this->color.r, this->color.g, this->color.b,
-                                          this->color.a);
+                      const Color col = this->color.get();
+                      shader.setUniform4f("uColor", col.r, col.g, col.b, col.a);
                       shader.setUniformMat4f(
                           "uTransform",
                           glm::translate(glm::mat4(1.0f), glm::vec3(rect.position, 0.0f))

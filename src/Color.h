@@ -87,6 +87,7 @@ struct Color {
     }
 
     // --- Utility ---
+    
     Color clamped() const
     {
         return Color(std::clamp(r, 0.0f, 1.0f), std::clamp(g, 0.0f, 1.0f),

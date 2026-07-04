@@ -52,7 +52,8 @@ int main()
     float graphTimeOffset = 0.0f;
 
     v3.createChild<ColoredRect>(alignment::ElementAlignment(), Color(0, 0, 0, 1));
-    v4.createChild<ColoredRect>(alignment::ElementAlignment(), Color(0.05, 0.05, 0.05, 1));
+    auto& v4rect
+        = v4.createChild<ColoredRect>(alignment::ElementAlignment(), Color(0.05, 0.05, 0.05, 1));
 
     auto& gradient = v3.createChild<ShaderQuad>(alignment::ElementAlignment(),
                                                 R"(
@@ -106,7 +107,11 @@ void main()
                 .setWidth(alignment::Pixels(200))
                 .setHeight(alignment::Relative(0.5f)),
             Color(1, 0, 0, 1), Color(0.8, 0, 0, 1), Color(0.5, 0, 0, 1), Color(1, 1, 1, 1), 16.0f,
-            "Press me!", []() { std::cout << "Pressed! Callback called" << std::endl; },
+            "Press me!",
+            [&]() {
+                std::cout << "Button Pressed!" << std::endl;
+                v4rect.color = Color(fc::Random::next(), fc::Random::next(), fc::Random::next());
+            },
             shapeRenderer, textRenderer);
 
     time::Moment lastTime = time::now();
