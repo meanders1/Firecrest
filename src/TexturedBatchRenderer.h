@@ -1,4 +1,5 @@
 #pragma once
+#include "Color.h"
 #include "Window.h"
 #include "gl/IndexBuffer.h"
 #include "gl/VertexArray.h"
@@ -40,7 +41,7 @@ private:
     void createIndicesForQuads(size_t quadCount);
     std::array<TexturedBatchRenderer::Vertex, 4> createQuad(const glm::vec2 position,
                                                             const glm::vec2 scale,
-                                                            const glm::vec4 color,
+                                                            const Color& color,
                                                             const uint32_t textureID);
 
 public:
@@ -49,7 +50,7 @@ public:
     void clearElements();
     void draw(const Window& window);
     void reserve(const size_t count);
-    void addQuad(const glm::vec2 position, const glm::vec2 scale, const glm::vec4 color,
+    void addQuad(const glm::vec2 position, const glm::vec2 scale, const Color& color,
                  const uint32_t textureIndex);
 };
 } // namespace fc

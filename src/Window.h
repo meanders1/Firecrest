@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Color.h"
 #include "Input.h"
 #include "glm/glm.hpp"
 #include <string>
@@ -23,7 +24,9 @@ struct WindowProperties {
           resizable(true),
           iconified(false),
           maximized(false),
-          antialiasing(false) {}
+          antialiasing(false)
+    {
+    }
 };
 
 class Window {
@@ -48,7 +51,7 @@ public:
     bool isMouseLocked() const;
     bool isMouseFree() const;
 
-    void clearColor(glm::vec4 color);
+    void clearColor(const Color& color);
     void clearScreen() const;
 
     inline const GLFWwindow* const handle() const { return _handle; }

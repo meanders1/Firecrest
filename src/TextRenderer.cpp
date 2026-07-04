@@ -6,14 +6,17 @@
 
 namespace fc {
 
-TextRenderer::TextRenderer(const std::string& fontPath) : _charset(fontPath) {
+TextRenderer::TextRenderer(const std::string& fontPath) : _charset(fontPath)
+{
     // Compile the MSDF shader
     const char* VERTEX_SOURCE = R"(
         #version 330 core
         layout(location = 0) in vec3 pos;
         layout(location = 1) in vec2 uv;
+
         out vec2 TexCoords;
         uniform mat4 projection;
+        
         void main() {
             gl_Position = projection * vec4(pos, 1.0);
             TexCoords = uv;
@@ -71,12 +74,14 @@ TextRenderer::TextRenderer(const std::string& fontPath) : _charset(fontPath) {
 }
 
 void TextRenderer::renderText(const Window& window, const std::string& text, glm::vec3 pos,
-                              float scale, glm::vec4 color) {
+                              float scale, Color color)
+{
     renderText(static_cast<glm::vec2>(window.dimensions()), text, pos, scale, color);
 }
 
 void TextRenderer::renderText(glm::vec2 viewportSize, const std::string& text, glm::vec3 pos,
-                              float scale, glm::vec4 color) {
+                              float scale, Color color)
+{
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -86,7 +91,7 @@ void TextRenderer::renderText(glm::vec2 viewportSize, const std::string& text, g
 
     _textShader.bind();
     _textShader.setUniformMat4f("projection", projection);
-    _textShader.setUniform4f("textColor", color.x, color.y, color.z, color.w);
+    _textShader.setUniform4f("textColor", color.r, color.g, color.b, color.a);
     _textShader.setUniform1i("atlas", 0);
     _charset.atlas().bind(0);
 
@@ -139,7 +144,8 @@ void TextRenderer::renderText(glm::vec2 viewportSize, const std::string& text, g
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-float TextRenderer::width(const std::string& text, float scale) {
+float TextRenderer::width(const std::string& text, float scale)
+{
     float x = 0;
     for (char c : text) {
         if (!std::isprint(c))
@@ -149,7 +155,8 @@ float TextRenderer::width(const std::string& text, float scale) {
     return x;
 }
 
-float TextRenderer::height(const std::string& text, float scale) {
+float TextRenderer::height(const std::string& text, float scale)
+{
     float minY = 1e6f;
     float maxY = -1e6f;
     for (char c : text) {
@@ -166,15 +173,18 @@ float TextRenderer::height(const std::string& text, float scale) {
     return maxY - minY;
 }
 
-float TextRenderer::lineHeight(float scale) {
+float TextRenderer::lineHeight(float scale)
+{
     return _charset.lineHeight() * scale;
 }
 
-float TextRenderer::descenderHeight(float scale) {
+float TextRenderer::descenderHeight(float scale)
+{
     return _charset.descender() * scale;
 }
 
-float TextRenderer::ascenderHeight(float scale) {
+float TextRenderer::ascenderHeight(float scale)
+{
     return _charset.ascender() * scale;
 }
 

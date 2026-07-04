@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "Color.h"
 #include "Element.h"
 #include "ShapeRenderer2D.h"
 #include "core/Maths.h"
@@ -23,10 +24,13 @@ public:
     float lineWidth = 2.0f;
 
     PlainGraph(alignment::ElementAlignment alignment, ShapeRenderer2D& renderer)
-        : Element(alignment), _renderer(renderer) {}
+        : Element(alignment), _renderer(renderer)
+    {
+    }
 
     // If min == max, the bounds are set to not be fixed.
-    PlainGraph& setYBounds(float min, float max) {
+    PlainGraph& setYBounds(float min, float max)
+    {
         _fixedBounds = true;
         _yMin = min;
         _yMax = max;
@@ -38,7 +42,8 @@ public:
         return *this;
     }
 
-    virtual void render(const Window& window, time::Duration delta) override {
+    virtual void render(const Window& window, time::Duration delta) override
+    {
         if (data.size() == 0)
             return;
 
@@ -82,7 +87,7 @@ public:
         for (float y = startY; y < dataMaxY; y += linesIntervalY) {
             linesY.push_back(y);
         }
-        const glm::vec4 color = {0.2, 0.2, 0.2, 1};
+        const Color color = {0.2, 0.2, 0.2, 1};
         for (float datax : linesX) {
             const float x = maths::map(datax, dataMinX, dataMaxX, minPos.x, maxPos.x);
             _renderer.lineSegment(window, {x, minPos.y}, {x, maxPos.y}, color);

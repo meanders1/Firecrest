@@ -4,7 +4,8 @@
 
 using namespace fc;
 
-int main() {
+int main()
+{
     WindowProperties properties;
     properties.width = 1400;
     properties.height = 800;
@@ -42,7 +43,7 @@ int main() {
                                                   .setY(alignment::Relative(0.5)));
 
     auto& textInput = v1.createChild<TextInput>(
-        alignment::ElementAlignment(), glm::vec4(1, 1, 1, 1), glm::vec4(0.1, 0.1, 0.1, 1), 24.0f,
+        alignment::ElementAlignment(), Color(1, 1, 1, 1), Color(0.1, 0.1, 0.1, 1), 24.0f,
         "This is a text input field. Try it!", shapeRenderer, textRenderer);
 
     auto& graph
@@ -50,10 +51,8 @@ int main() {
     std::vector<glm::vec2> graphData;
     float graphTimeOffset = 0.0f;
 
-    v3.createChild<ColoredRect>(alignment::ElementAlignment(), glm::vec4(0, 0, 0, 1),
-                                shapeRenderer);
-    v4.createChild<ColoredRect>(alignment::ElementAlignment(), glm::vec4(0.05, 0.05, 0.05, 1),
-                                shapeRenderer);
+    v3.createChild<ColoredRect>(alignment::ElementAlignment(), Color(0, 0, 0, 1));
+    v4.createChild<ColoredRect>(alignment::ElementAlignment(), Color(0.05, 0.05, 0.05, 1));
 
     auto& gradient = v3.createChild<ShaderQuad>(alignment::ElementAlignment(),
                                                 R"(
@@ -106,10 +105,9 @@ void main()
             alignment::ElementAlignment()
                 .setWidth(alignment::Pixels(200))
                 .setHeight(alignment::Relative(0.5f)),
-            glm::vec4(1, 0, 0, 1), glm::vec4(0.8, 0, 0, 1), glm::vec4(0.5, 0, 0, 1),
-            glm::vec4(1, 1, 1, 1), 16.0f, "Press me!",
-            []() { std::cout << "Pressed! Callback called" << std::endl; }, shapeRenderer,
-            textRenderer);
+            Color(1, 0, 0, 1), Color(0.8, 0, 0, 1), Color(0.5, 0, 0, 1), Color(1, 1, 1, 1), 16.0f,
+            "Press me!", []() { std::cout << "Pressed! Callback called" << std::endl; },
+            shapeRenderer, textRenderer);
 
     time::Moment lastTime = time::now();
     while (!window.shouldClose()) {

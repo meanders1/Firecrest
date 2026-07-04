@@ -1,4 +1,5 @@
 #include "ColoredBatchRenderer.h"
+#include "Color.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "res/ResourceManager.h"
 
@@ -35,7 +36,8 @@ void main() {
 )";
 
 namespace fc {
-void ColoredBatchRenderer::createIndicesForQuads(size_t quadCount) {
+void ColoredBatchRenderer::createIndicesForQuads(size_t quadCount)
+{
     if (quadCount * INDICES_PER_QUAD == _indices.size())
         return;
     _indices.resize(quadCount * INDICES_PER_QUAD);
@@ -58,10 +60,9 @@ void ColoredBatchRenderer::createIndicesForQuads(size_t quadCount) {
 
 std::array<ColoredBatchRenderer::Vertex, 4>
 ColoredBatchRenderer::createQuad(const glm::vec2 position, const glm::vec2 scale,
-                                 const glm::vec4 color) {
-    GLuint packedColor
-        = ((GLuint)(GLubyte)(color.r * 255) << 0) | ((GLuint)(GLubyte)(color.g * 255) << 8)
-          | ((GLuint)(GLubyte)(color.b * 255) << 16) | ((GLuint)(GLubyte)(color.a * 255) << 24);
+                                 const fc::Color color)
+{
+    GLuint packedColor = color.toHex(true);
 
     ColoredBatchRenderer::Vertex v1;
     v1.position = glm::vec2(-0.5f, -0.5f) * scale + position;
@@ -83,7 +84,8 @@ ColoredBatchRenderer::createQuad(const glm::vec2 position, const glm::vec2 scale
 }
 
 ColoredBatchRenderer::ColoredBatchRenderer(Window& window, res::ResourceManager& resourceManager)
-    : _window(window), _resourceManager(resourceManager) {
+    : _window(window), _resourceManager(resourceManager)
+{
     _shader = resourceManager.loadShaderSource(VERTEX_SOURCE, FRAGMENT_SOURCE);
     _shader->bind();
 
@@ -103,11 +105,13 @@ ColoredBatchRenderer::ColoredBatchRenderer(Window& window, res::ResourceManager&
     _IBO.unbind();
 }
 
-void ColoredBatchRenderer::clearElements() {
+void ColoredBatchRenderer::clearElements()
+{
     _vertices.clear();
 }
 
-void ColoredBatchRenderer::draw() {
+void ColoredBatchRenderer::draw()
+{
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -115,7 +119,7 @@ void ColoredBatchRenderer::draw() {
     glCullFace(GL_BACK);
 
     _VBO.setData(_vertices.data(), _vertices.size() * sizeof(ColoredBatchRenderer::Vertex),
-                GL_STREAM_DRAW);
+                 GL_STREAM_DRAW);
 
     _shader->bind();
 
@@ -132,16 +136,18 @@ void ColoredBatchRenderer::draw() {
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-void ColoredBatchRenderer::reserve(const size_t quadCount) {
+void ColoredBatchRenderer::reserve(const size_t quadCount)
+{
     _vertices.reserve(quadCount * VERTICES_PER_QUAD);
     createIndicesForQuads(quadCount);
 
     _VBO.setData(nullptr, quadCount * sizeof(ColoredBatchRenderer::Vertex) * VERTICES_PER_QUAD,
-                GL_STREAM_DRAW);
+                 GL_STREAM_DRAW);
 }
 
 void ColoredBatchRenderer::addQuad(const glm::vec2 position, const glm::vec2 scale,
-                                   const glm::vec4 color) {
+                                   const fc::Color color)
+{
     std::array<ColoredBatchRenderer::Vertex, 4> quad = createQuad(position, scale, color);
     _vertices.push_back(quad[0]);
     _vertices.push_back(quad[1]);

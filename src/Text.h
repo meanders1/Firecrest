@@ -1,4 +1,5 @@
 #pragma once
+#include "Color.h"
 #include "Container.h"
 #include "Element.h"
 #include "TextRenderer.h"
@@ -22,7 +23,7 @@ public:
     alignment::AlignmentFunction defaultWidth;
     alignment::AlignmentFunction defaultHeight;
 
-    Tracked<glm::vec4> color;
+    Tracked<Color> color;
     Tracked<float> textSize;
     Tracked<WrapMode> wrapMode{WrapMode::Wrap};
     Tracked<bool> wrapTightly{false};
@@ -36,7 +37,7 @@ private:
     std::string _lastText;
 
 public:
-    Text(alignment::ElementAlignment alignment, glm::vec4 textColor, float textSize,
+    Text(alignment::ElementAlignment alignment, Color textColor, float textSize,
          const std::string& text, TextRenderer& textRenderer)
         : Element(alignment),
           textSize(textSize),
@@ -44,9 +45,12 @@ public:
           color(textColor),
           defaultWidth(alignment.width),
           defaultHeight(alignment.height),
-          text(text) {}
+          text(text)
+    {
+    }
 
-    virtual void render(const Window& window, time::Duration delta) override {
+    virtual void render(const Window& window, time::Duration delta) override
+    {
         bool shouldRebuild = false;
 
         const glm::vec2 parentSize = parent().getPixelSize();
@@ -92,7 +96,8 @@ public:
         gl::RenderRegion::pop();
     }
 
-    void buildLinesCache() {
+    void buildLinesCache()
+    {
         _linesCache.clear();
         const std::string string = text;
         const float maxLineWidth
@@ -103,7 +108,8 @@ public:
 
         if (wrapMode == WrapMode::NoWrap) {
             _linesCache.push_back({string, {0, -lineHeight}});
-        } else if (wrapMode == WrapMode::Wrap) {
+        }
+        else if (wrapMode == WrapMode::Wrap) {
             float yPos = 0;
 
             auto segments = utils::strsplit(string, "\n", true);
@@ -152,10 +158,12 @@ public:
 
             if (widestLineWidth <= maxLineWidth) {
                 alignment.setWidth(alignment::Pixels(widestLineWidth));
-            } else {
+            }
+            else {
                 alignment.setWidth(defaultWidth);
             }
-        } else {
+        }
+        else {
             alignment.setWidth(defaultWidth);
         }
 
@@ -163,7 +171,8 @@ public:
             const float height
                 = lineHeight * _linesCache.size() - renderer.descenderHeight(textSize);
             alignment.setHeight(alignment::Pixels(height));
-        } else {
+        }
+        else {
             alignment.setHeight(defaultHeight);
         }
 
@@ -175,7 +184,8 @@ public:
     }
 
     // vector<pair<lineText, position>>
-    std::vector<std::pair<std::string, glm::vec2>> lines() const {
+    std::vector<std::pair<std::string, glm::vec2>> lines() const
+    {
         std::vector<std::pair<std::string, glm::vec2>> l = _linesCache;
         const glm::vec2 pos = getPixelPosition();
         for (auto& line : l) {

@@ -1,4 +1,5 @@
 #pragma once
+#include "Color.h"
 #include "Element.h"
 #include "ShapeRenderer2D.h"
 #include "gl/Painter.h"
@@ -47,13 +48,13 @@ public:
     };
 
 public:
-    glm::vec4 color;
+    Color color;
 
     gl::Shape<Vertex> shape;
     gl::Painter<Vertex> painter;
 
 public:
-    ColoredRect(alignment::ElementAlignment alignment, glm::vec4 color)
+    ColoredRect(alignment::ElementAlignment alignment, Color color)
         : ColoredRect(
               alignment, color,
               gl::Painter<Vertex>(
@@ -73,8 +74,7 @@ public:
     {
     }
 
-    ColoredRect(alignment::ElementAlignment alignment, glm::vec4 color,
-                gl::Painter<Vertex>&& painter)
+    ColoredRect(alignment::ElementAlignment alignment, Color color, gl::Painter<Vertex>&& painter)
         : Element(alignment), color(color), painter(std::move(painter))
     {
         const std::vector<Vertex> vertices = {{{0, 0}}, {{1, 0}}, {{1, 1}}, {{0, 1}}};

@@ -12,10 +12,10 @@ private:
     int _cursorBlinkCounter = 0;
     bool _showCursor = false;
     ShapeRenderer2D& _renderer;
-    glm::vec4 _backgroundColor;
+    Color _backgroundColor;
 
 public:
-    TextInput(alignment::ElementAlignment alignment, glm::vec4 backgroundColor, glm::vec4 textColor,
+    TextInput(alignment::ElementAlignment alignment, Color backgroundColor, Color textColor,
               float textSize, const std::string& text, ShapeRenderer2D& boxRenderer,
               TextRenderer& textRenderer)
         : Scrollable(alignment, boxRenderer),

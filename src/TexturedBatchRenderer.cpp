@@ -16,10 +16,10 @@ out vec2 v_TexCoord;
 flat out uint v_TexID;
 
 void main() {
-	uint r =  a_RGBA        & 255;
-	uint g = (a_RGBA >> 8)  & 255;
-	uint b = (a_RGBA >> 16) & 255;
-	uint a = (a_RGBA >> 24) & 255;
+    uint r = (a_RGBA >> 24) & 255;
+	uint g = (a_RGBA >> 16) & 255;
+	uint b = (a_RGBA >> 8)  & 255;
+	uint a =  a_RGBA        & 255;
 	v_Color = vec4(float(r) / 255.0, float(g) / 255.0, float(b) / 255.0, float(a) / 255.0);
 	
 	vec2 texCoords[4] = {
@@ -55,7 +55,8 @@ void main() {
 
 namespace fc {
 
-void TexturedBatchRenderer::createIndicesForQuads(const size_t quadCount) {
+void TexturedBatchRenderer::createIndicesForQuads(const size_t quadCount)
+{
     if (quadCount * INDICES_PER_QUAD == _indices.size())
         return;
     _indices.resize(quadCount * INDICES_PER_QUAD);
@@ -78,10 +79,9 @@ void TexturedBatchRenderer::createIndicesForQuads(const size_t quadCount) {
 
 std::array<TexturedBatchRenderer::Vertex, 4>
 TexturedBatchRenderer::createQuad(const glm::vec2 position, const glm::vec2 scale,
-                                  const glm::vec4 color, const uint32_t textureID) {
-    GLuint packedColor
-        = ((GLuint)(GLubyte)(color.r * 255) << 0) | ((GLuint)(GLubyte)(color.g * 255) << 8)
-          | ((GLuint)(GLubyte)(color.b * 255) << 16) | ((GLuint)(GLubyte)(color.a * 255) << 24);
+                                  const Color& color, const uint32_t textureID)
+{
+    GLuint packedColor = color.toHex(true);
 
     GLuint texID = textureID << 2;
 
@@ -109,7 +109,8 @@ TexturedBatchRenderer::createQuad(const glm::vec2 position, const glm::vec2 scal
 }
 
 TexturedBatchRenderer::TexturedBatchRenderer(Window& window, res::ResourceManager& resourceManager)
-    : _resourceManager(resourceManager) {
+    : _resourceManager(resourceManager)
+{
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -139,25 +140,29 @@ TexturedBatchRenderer::TexturedBatchRenderer(Window& window, res::ResourceManage
     _IBO.unbind();
 }
 
-void TexturedBatchRenderer::addTexture(const std::string textureFile, const bool blurred) {
+void TexturedBatchRenderer::addTexture(const std::string textureFile, const bool blurred)
+{
     _textures.push_back(_resourceManager.loadTexture(textureFile, blurred));
 }
 
-void TexturedBatchRenderer::clearElements() {
+void TexturedBatchRenderer::clearElements()
+{
     _vertices.clear();
 }
 
-void TexturedBatchRenderer::reserve(const size_t count) {
+void TexturedBatchRenderer::reserve(const size_t count)
+{
     _vertices.reserve(count * VERTICES_PER_QUAD);
     createIndicesForQuads(count);
 
     _VBO.setData(nullptr, count * sizeof(TexturedBatchRenderer::Vertex) * VERTICES_PER_QUAD,
-                GL_STREAM_DRAW);
+                 GL_STREAM_DRAW);
 }
 
-void TexturedBatchRenderer::draw(const Window& window) {
+void TexturedBatchRenderer::draw(const Window& window)
+{
     _VBO.setData(_vertices.data(), _vertices.size() * sizeof(TexturedBatchRenderer::Vertex),
-                GL_STREAM_DRAW);
+                 GL_STREAM_DRAW);
 
     _shader->bind();
 
@@ -176,7 +181,7 @@ void TexturedBatchRenderer::draw(const Window& window) {
         samplers.push_back(static_cast<GLuint>(i));
     }
     _shader->setUniformSamplers("u_Textures", static_cast<GLsizei>(_textures.size()),
-                               samplers.data());
+                                samplers.data());
 
     for (size_t i = 0; i < _textures.size(); i++) {
         _textures[i]->bind(i);
@@ -191,7 +196,8 @@ void TexturedBatchRenderer::draw(const Window& window) {
 }
 
 void TexturedBatchRenderer::addQuad(const glm::vec2 position, const glm::vec2 scale,
-                                    const glm::vec4 color, const uint32_t textureIndex) {
+                                    const Color& color, const uint32_t textureIndex)
+{
     std::array<TexturedBatchRenderer::Vertex, 4> quad
         = createQuad(position, scale, color, textureIndex);
     _vertices.push_back(quad[0]);

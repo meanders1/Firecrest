@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Color.h"
 #include "Window.h"
 #include "fiv.hpp"
 #include "gl/IndexBuffer.h"
@@ -39,13 +40,13 @@ private:
 private:
     void createIndicesForQuads(size_t quadCount);
     std::array<ColoredBatchRenderer::Vertex, 4>
-    createQuad(const glm::vec2 position, const glm::vec2 scale, const glm::vec4 color);
+    createQuad(const glm::vec2 position, const glm::vec2 scale, const fc::Color color);
 
 public:
     ColoredBatchRenderer(Window& window, res::ResourceManager& resourceManager);
     void clearElements();
     void reserve(const size_t quadCount);
-    void addQuad(const glm::vec2 position, const glm::vec2 scale, const glm::vec4 color);
+    void addQuad(const glm::vec2 position, const glm::vec2 scale, const fc::Color color);
     void draw();
 };
 } // namespace fc
