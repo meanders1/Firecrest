@@ -9,8 +9,10 @@ struct VertexBufferElement {
     GLenum type;
     GLint count;
     GLboolean normalized;
+    GLuint offset;
 
-    static GLint sizeOfType(GLenum type) {
+    static GLint sizeOfType(GLenum type)
+    {
         switch (type) {
         case GL_BOOL:
             return sizeof(GLboolean);
@@ -38,7 +40,8 @@ struct VertexBufferElement {
         return -1;
     }
 
-    static bool isInteger(GLenum type) {
+    static bool isInteger(GLenum type)
+    {
         switch (type) {
         case GL_BOOL:
             return false;
@@ -66,27 +69,23 @@ struct VertexBufferElement {
         // Should not reach this return
         return false;
     }
-
-    VertexBufferElement(GLenum type, GLint count, GLboolean normalized)
-        : type(type), count(count), normalized(normalized) {}
 };
 
 class VertexBufferLayout {
 private:
-    std::vector<VertexBufferElement> m_Elements;
-    uint32_t m_Stride;
+    std::vector<VertexBufferElement> _elements;
+    GLuint _stride = 0;
 
 public:
-    VertexBufferLayout() : m_Stride(0) {}
-
-    void push(GLenum type, GLint count, GLboolean normalized = GL_FALSE) {
-        m_Elements.push_back({type, count, normalized});
-        m_Stride += count * VertexBufferElement::sizeOfType(type);
+    void push(GLenum type, GLint count, GLboolean normalized = GL_FALSE)
+    {
+        _elements.push_back({type, count, normalized, _stride});
+        _stride += count * VertexBufferElement::sizeOfType(type);
     }
 
-    inline const std::vector<VertexBufferElement>& getElements() const { return m_Elements; }
+    inline const std::vector<VertexBufferElement>& elements() const { return _elements; }
 
-    inline unsigned int getStride() const { return m_Stride; }
+    inline GLuint getStride() const { return _stride; }
 };
 
 } // namespace fc::gl

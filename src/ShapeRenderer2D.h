@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Color.h"
 #include "Renderer.h"
 #include "Window.h"
 #include "fiv.hpp"
@@ -20,8 +21,6 @@ private:
                      // RRRRRRRRGGGGGGGGBBBBBBBBAAAAAAAA
     };
 
-    GLuint packColor(glm::vec4 color);
-
 private:
     gl::IndexBuffer m_IBO;
     gl::VertexBuffer m_VBO;
@@ -40,16 +39,16 @@ public:
     // Adds a shape with its vertices like a triangle fan
     // The vertices must be in a counterclockwise order
     void renderFan(const Window& window, const std::vector<Vertex>& vertices);
-    void rect(const Window& window, glm::vec2 position, glm::vec2 scale, glm::vec4 color);
-    void roundedRect(const Window& window, glm::vec2 position, glm::vec2 scale, glm::vec4 color,
+    void rect(const Window& window, glm::vec2 position, glm::vec2 scale, Color color);
+    void roundedRect(const Window& window, glm::vec2 position, glm::vec2 scale, Color color,
                      float radius, uint32_t quality);
-    void circle(const Window& window, glm::vec2 center, float radius, glm::vec4 color,
+    void circle(const Window& window, glm::vec2 center, float radius, Color color,
                 uint32_t quality = 64);
 
-    void lineStrip(const Window& window, std::vector<glm::vec2> points, glm::vec4 color,
+    void lineStrip(const Window& window, std::vector<glm::vec2> points, Color color,
                    float thickness);
 
     // Draws a line segment with a thickness of one.
-    void lineSegment(const Window& window, glm::vec2 point1, glm::vec2 point2, glm::vec4 color);
+    void lineSegment(const Window& window, glm::vec2 point1, glm::vec2 point2, Color color);
 };
 } // namespace fc

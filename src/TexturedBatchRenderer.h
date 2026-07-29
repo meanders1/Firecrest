@@ -1,4 +1,5 @@
 #pragma once
+#include "Color.h"
 #include "Window.h"
 #include "gl/IndexBuffer.h"
 #include "gl/VertexArray.h"
@@ -23,24 +24,24 @@ private:
     const uint32_t VERTICES_PER_QUAD = 4;
 
 private:
-    std::vector<TexturedBatchRenderer::Vertex> vertices;
-    res::ResourceManager& resourceManager;
+    std::vector<TexturedBatchRenderer::Vertex> _vertices;
+    res::ResourceManager& _resourceManager;
 
-    glm::mat4 m_View;
-    glm::mat4 m_Projection;
+    glm::mat4 _view;
+    glm::mat4 _projection;
 
-    std::vector<res::TextureHandle> textures;
-    std::vector<GLuint> indices;
-    gl::IndexBuffer ibo;
-    gl::VertexBuffer vbo;
-    gl::VertexArray vao;
-    res::ShaderHandle shader;
+    std::vector<res::TextureHandle> _textures;
+    std::vector<GLuint> _indices;
+    gl::IndexBuffer _IBO;
+    gl::VertexBuffer _VBO;
+    gl::VertexArray _VAO;
+    res::ShaderHandle _shader;
 
 private:
     void createIndicesForQuads(size_t quadCount);
     std::array<TexturedBatchRenderer::Vertex, 4> createQuad(const glm::vec2 position,
                                                             const glm::vec2 scale,
-                                                            const glm::vec4 color,
+                                                            const Color& color,
                                                             const uint32_t textureID);
 
 public:
@@ -49,7 +50,7 @@ public:
     void clearElements();
     void draw(const Window& window);
     void reserve(const size_t count);
-    void addQuad(const glm::vec2 position, const glm::vec2 scale, const glm::vec4 color,
+    void addQuad(const glm::vec2 position, const glm::vec2 scale, const Color& color,
                  const uint32_t textureIndex);
 };
 } // namespace fc

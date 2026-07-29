@@ -9,7 +9,8 @@ namespace fc {
 void APIENTRY debugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
                           GLsizei length, const char* message, const void* userParam);
 
-Window::Window(WindowProperties& properties) {
+Window::Window(WindowProperties& properties)
+{
     if (!glfwInit()) {
         std::cout << "Failed to initialize GLFW" << std::endl;
     }
@@ -101,109 +102,131 @@ Window::Window(WindowProperties& properties) {
     glClearColor(0, 0, 0, 1);
 }
 
-Window::~Window() {
+Window::~Window()
+{
     glfwDestroyWindow(_handle);
 }
 
-void Window::display() {
+void Window::display()
+{
     _input.update();
     glfwSwapBuffers(_handle);
     glfwPollEvents();
 }
 
-bool Window::shouldClose() const {
+bool Window::shouldClose() const
+{
     return glfwWindowShouldClose(_handle);
 }
 
-void Window::setTitle(const std::string& title) {
+void Window::setTitle(const std::string& title)
+{
     glfwSetWindowTitle(_handle, title.c_str());
 }
 
-void Window::lockMouse() {
+void Window::lockMouse()
+{
     glfwSetInputMode(_handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
-void Window::freeMouse() {
+void Window::freeMouse()
+{
     glfwSetInputMode(_handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-bool Window::isMouseLocked() const {
+bool Window::isMouseLocked() const
+{
     return glfwGetInputMode(_handle, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 }
 
-bool Window::isMouseFree() const {
+bool Window::isMouseFree() const
+{
     return glfwGetInputMode(_handle, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
 }
 
-void Window::clearScreen() const {
+void Window::clearScreen() const
+{
     glClearColor(_clearColor.x, _clearColor.y, _clearColor.z, _clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Window::clearColor(glm::vec4 color) {
-    glClearColor(color.x, color.y, color.z, color.w);
+void Window::clearColor(const Color& color)
+{
+    glClearColor(color.r, color.g, color.b, color.a);
     _clearColor = color;
 }
 
-int Window::width() const {
+int Window::width() const
+{
     int width, height;
     glfwGetWindowSize(_handle, &width, &height);
     return width;
 }
 
-int Window::height() const {
+int Window::height() const
+{
     int width, height;
     glfwGetWindowSize(_handle, &width, &height);
     return height;
 }
 
-glm::ivec2 Window::dimensions() const {
+glm::ivec2 Window::dimensions() const
+{
     int width, height;
     glfwGetWindowSize(_handle, &width, &height);
     return {width, height};
 }
 
-glm::mat4 Window::orthographicProjection() const {
+glm::mat4 Window::orthographicProjection() const
+{
     glm::ivec2 dims = dimensions();
     return glm::ortho(0.0f, static_cast<float>(dims.x), 0.0f, static_cast<float>(dims.y), -40.0f,
                       40.0f);
 }
 
-void Window::resized() {
+void Window::resized()
+{
     glm::ivec2 dim = dimensions();
     gl::RenderRegion::base = {0.0f, 0.0f, static_cast<float>(dim.x), static_cast<float>(dim.y)};
     gl::RenderRegion::applyBase();
 }
 
-void Window::sizeCallback(GLFWwindow* window, int width, int height) {
+void Window::sizeCallback(GLFWwindow* window, int width, int height)
+{
     Window* windowObj = static_cast<Window*>(glfwGetWindowUserPointer(window));
     windowObj->sizeCallback(width, height);
 }
 
-void Window::sizeCallback(int width, int height) {
+void Window::sizeCallback(int width, int height)
+{
     resized();
 }
 
-void Window::iconifyCallback(GLFWwindow* window, int iconified) {
+void Window::iconifyCallback(GLFWwindow* window, int iconified)
+{
     Window* windowObj = static_cast<Window*>(glfwGetWindowUserPointer(window));
     windowObj->iconifyCallback(iconified);
 }
 
-void Window::iconifyCallback(int iconified) {
+void Window::iconifyCallback(int iconified)
+{
     resized();
 }
 
-void Window::maximizeCallback(GLFWwindow* window, int maximized) {
+void Window::maximizeCallback(GLFWwindow* window, int maximized)
+{
     Window* windowObj = static_cast<Window*>(glfwGetWindowUserPointer(window));
     windowObj->maximizeCallback(maximized);
 }
 
-void Window::maximizeCallback(int maximized) {
+void Window::maximizeCallback(int maximized)
+{
     resized();
 }
 
 void APIENTRY debugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
-                          GLsizei length, const char* message, const void* userParam) {
+                          GLsizei length, const char* message, const void* userParam)
+{
 
     // ignore non-significant error/warning codes
     // if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;

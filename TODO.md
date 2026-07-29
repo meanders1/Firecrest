@@ -16,6 +16,7 @@
 - [x] Custom shaders
 - [ ] Transitions/Animations
 - [ ] Create Shape-objects that contains their own meshes, so ShapeRenderer2D does not have to rewrite its own for every shape drawn
+- [ ] Scoped binding
 
 ## Modifications
 
@@ -25,3 +26,4 @@
 - [ ] Make it possible to run compute shaders without creating a window.
 - [ ] Cache alignments
 - [ ] Have caches for GL_DEPTH_TEST, GL_CULL_FACE etc. if there is a performance hit from calling them often.
+- [x] Improve RAII

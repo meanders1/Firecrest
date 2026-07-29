@@ -14,10 +14,10 @@ uniform mat4 u_ViewProj;
 out vec4 v_Color;
 
 void main() {
-	uint r =  a_RGBA        & 255;
-	uint g = (a_RGBA >> 8)  & 255;
-	uint b = (a_RGBA >> 16) & 255;
-	uint a = (a_RGBA >> 24) & 255;
+	uint r = (a_RGBA >> 24) & 255;
+	uint g = (a_RGBA >> 16) & 255;
+	uint b = (a_RGBA >> 8)  & 255;
+	uint a =  a_RGBA        & 255;
 	v_Color = vec4(float(r) / 255.0, float(g) / 255.0, float(b) / 255.0, float(a) / 255.0);
 	gl_Position = u_ViewProj * vec4(a_Position, 0.0, 1.0);
 }
@@ -36,14 +36,9 @@ void main() {
 )";
 
 namespace fc {
-GLuint ShapeRenderer2D::packColor(glm::vec4 color) {
-    GLuint packedColor
-        = ((GLuint)(GLubyte)(color.r * 255) << 0) | ((GLuint)(GLubyte)(color.g * 255) << 8)
-          | ((GLuint)(GLubyte)(color.b * 255) << 16) | ((GLuint)(GLubyte)(color.a * 255) << 24);
-    return packedColor;
-}
 
-ShapeRenderer2D::ShapeRenderer2D() {
+ShapeRenderer2D::ShapeRenderer2D()
+{
     m_Shader.addStageSource(GL_VERTEX_SHADER, VERTEX_SHADER_SOURCE);
     m_Shader.addStageSource(GL_FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
     m_Shader.link();
@@ -67,7 +62,8 @@ void ShapeRenderer2D::beforeRender(const Window& window) {}
 
 void ShapeRenderer2D::afterRender(const Window& window) {}
 
-void ShapeRenderer2D::renderFan(const Window& window, const std::vector<Vertex>& vertices) {
+void ShapeRenderer2D::renderFan(const Window& window, const std::vector<Vertex>& vertices)
+{
     if (vertices.size() < 3)
         return;
 
@@ -105,12 +101,12 @@ void ShapeRenderer2D::renderFan(const Window& window, const std::vector<Vertex>&
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
 }
 
-void ShapeRenderer2D::rect(const Window& window, glm::vec2 position, glm::vec2 scale,
-                           glm::vec4 color) {
+void ShapeRenderer2D::rect(const Window& window, glm::vec2 position, glm::vec2 scale, Color color)
+{
     if (scale.x <= 0 || scale.y <= 0)
         return;
 
-    const GLuint packedColor = packColor(color);
+    const GLuint packedColor = color.toHex(true);
 
     ShapeRenderer2D::Vertex v1;
     v1.position = glm::vec2(0, 0) * scale + position;
@@ -132,7 +128,8 @@ void ShapeRenderer2D::rect(const Window& window, glm::vec2 position, glm::vec2 s
 }
 
 void fc::ShapeRenderer2D::roundedRect(const Window& window, glm::vec2 position, glm::vec2 scale,
-                                      glm::vec4 color, float radius, uint32_t quality) {
+                                      Color color, float radius, uint32_t quality)
+{
     if (scale.x <= 0 || scale.y <= 0)
         return;
 
@@ -144,7 +141,7 @@ void fc::ShapeRenderer2D::roundedRect(const Window& window, glm::vec2 position, 
     }
 
     std::vector<ShapeRenderer2D::Vertex> vertices;
-    const GLuint packedColor = packColor(color);
+    const GLuint packedColor = color.toHex(true);
 
     RoundedRectGenerator generator(scale, radius, quality);
     for (uint32_t i = 0; i < quality; i++) {
@@ -154,13 +151,14 @@ void fc::ShapeRenderer2D::roundedRect(const Window& window, glm::vec2 position, 
     renderFan(window, vertices);
 }
 
-void ShapeRenderer2D::circle(const Window& window, glm::vec2 center, float radius, glm::vec4 color,
-                             uint32_t quality) {
+void ShapeRenderer2D::circle(const Window& window, glm::vec2 center, float radius, Color color,
+                             uint32_t quality)
+{
     if (radius < 0)
         radius = -radius;
 
     std::vector<ShapeRenderer2D::Vertex> vertices;
-    const GLuint packedColor = packColor(color);
+    const GLuint packedColor = color.toHex(true);
 
     CircleGenerator generator(radius, quality);
     for (uint32_t i = 0; i < quality; i++) {
@@ -170,12 +168,13 @@ void ShapeRenderer2D::circle(const Window& window, glm::vec2 center, float radiu
     renderFan(window, vertices);
 }
 
-void ShapeRenderer2D::lineStrip(const Window& window, std::vector<glm::vec2> points,
-                                glm::vec4 color, float thickness) {
+void ShapeRenderer2D::lineStrip(const Window& window, std::vector<glm::vec2> points, Color color,
+                                float thickness)
+{
     if (points.size() < 2 || thickness <= 0.0f)
         return;
 
-    const GLuint packedColor = packColor(color);
+    const GLuint packedColor = color.toHex(true);
     std::vector<ShapeRenderer2D::Vertex> vertices;
     std::vector<GLuint> indices;
 
@@ -193,11 +192,13 @@ void ShapeRenderer2D::lineStrip(const Window& window, std::vector<glm::vec2> poi
             // Start cap
             normalNext = getNormal(points[i], points[i + 1]);
             miter = normalNext;
-        } else if (i == points.size() - 1) {
+        }
+        else if (i == points.size() - 1) {
             // End cap
             normalPrev = getNormal(points[i - 1], points[i]);
             miter = normalPrev;
-        } else {
+        }
+        else {
             normalPrev = getNormal(points[i - 1], points[i]);
             normalNext = getNormal(points[i], points[i + 1]);
             glm::vec2 tangent = glm::normalize(glm::normalize(points[i + 1] - points[i])
@@ -243,14 +244,15 @@ void ShapeRenderer2D::lineStrip(const Window& window, std::vector<glm::vec2> poi
                    nullptr);
 }
 void ShapeRenderer2D::lineSegment(const Window& window, glm::vec2 point1, glm::vec2 point2,
-                                  glm::vec4 color) {
+                                  Color color)
+{
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    const GLuint packedColor = packColor(color);
+    const GLuint packedColor = color.toHex(true);
     ShapeRenderer2D::Vertex v1{point1, packedColor};
     ShapeRenderer2D::Vertex v2{point2, packedColor};
     std::vector<ShapeRenderer2D::Vertex> vertices = {v1, v2};

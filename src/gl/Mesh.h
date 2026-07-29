@@ -1,28 +1,23 @@
 #pragma once
-#include "gl/IndexBuffer.h"
-#include "gl/Vertex3D.h"
-#include "gl/VertexArray.h"
-#include "gl/VertexBuffer.h"
+
+#include "Shape.h"
+#include "Vertex3D.h"
 #include <vector>
 
 namespace fc::gl {
 
-class Mesh {
+class Mesh : public Shape<Vertex3D> {
 public:
-    Mesh(const std::vector<Vertex3D>& vertices, const std::vector<GLuint>& indices);
+    Mesh(const std::vector<Vertex3D>& vertices, const std::vector<GLuint>& indices)
+        : Shape(vertices, indices, GL_STATIC_DRAW)
+    {
+    }
 
-    // move assignment
-    Mesh& operator=(Mesh&& other);
-    // move constructor
-    Mesh(Mesh&& other);
+    Mesh& operator=(Mesh&& other) noexcept = default;
+    Mesh(Mesh&& other) noexcept = default;
 
     Mesh(const Mesh&) = delete;
     Mesh& operator=(const Mesh&) = delete;
-
-public:
-    VertexArray VAO;
-    VertexBuffer VBO;
-    IndexBuffer IBO;
 };
 
 } // namespace fc::gl

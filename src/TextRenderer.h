@@ -1,5 +1,6 @@
 #pragma once
 #include "Charset.h"
+#include "Color.h"
 #include "Renderer.h"
 #include "Window.h"
 #include "fiv.hpp"
@@ -22,8 +23,8 @@ private:
 
 private:
     gl::Shader _textShader;
-    gl::VertexArray _vao;
-    gl::VertexBuffer _vbo;
+    gl::VertexArray _VAO;
+    gl::VertexBuffer _VBO;
 
     Charset _charset;
 
@@ -34,9 +35,9 @@ public:
     TextRenderer& operator=(const TextRenderer&) = delete;
 
     void renderText(const Window& window, const std::string& text, glm::vec3 pos, float scale,
-                    glm::vec4 color);
+                    Color color);
     void renderText(glm::vec2 viewportSize, const std::string& text, glm::vec3 pos, float scale,
-                    glm::vec4 color);
+                    Color color);
     float width(const std::string& text, float scale);
     float height(const std::string& text, float scale);
     float lineHeight(float scale);

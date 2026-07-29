@@ -4,7 +4,8 @@
 namespace fc {
 class HorisontalCenterer : public Container {
 public:
-    HorisontalCenterer() : Container(alignment::ElementAlignment()) {
+    HorisontalCenterer() : Container(alignment::ElementAlignment())
+    {
         this->alignment.height = [this](float parent1, float parent2) -> float {
             float minY = INFINITY;
             float maxY = 0;
@@ -22,7 +23,8 @@ public:
         };
     }
 
-    virtual void childCreated(fiv::ID id) override {
+    virtual void childCreated(fiv::ID id) override
+    {
         auto& child = children()[id];
         child->alignment.x = [id, this](float parent1, float parent2) -> float {
             const float width = children()[id]->getPixelSize().x;
@@ -31,7 +33,8 @@ public:
     }
 
     virtual glm::vec2
-    calculateChildPixelSize(const alignment::ElementAlignment& childAlignment) const {
+    calculateChildPixelSize(const alignment::ElementAlignment& childAlignment) const override
+    {
         return childAlignment.getPixelSize(parent().getPixelSize());
     }
 };

@@ -1,6 +1,6 @@
 #include "RenderTarget.h"
 
-fc::gl::RenderTarget::RenderTarget(int width, int height) : m_Width(width), m_Height(height) {
+fc::gl::RenderTarget::RenderTarget(int width, int height) : _width(width), _height(height) {
     create();
 }
 
@@ -9,8 +9,8 @@ fc::gl::RenderTarget::~RenderTarget() {
 }
 
 void fc::gl::RenderTarget::bind() const {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    glViewport(0, 0, m_Width, m_Height);
+    glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
+    glViewport(0, 0, _width, _height);
 }
 
 void fc::gl::RenderTarget::unbind() {
@@ -18,7 +18,7 @@ void fc::gl::RenderTarget::unbind() {
 }
 
 void fc::gl::RenderTarget::bindTexture(size_t slot) const {
-    m_colorTexture.bind(slot);
+    _colorTexture.bind(slot);
 }
 
 void fc::gl::RenderTarget::clear(float r, float g, float b, float a) const {
@@ -27,23 +27,23 @@ void fc::gl::RenderTarget::clear(float r, float g, float b, float a) const {
 }
 
 void fc::gl::RenderTarget::create() {
-    glGenFramebuffers(1, &m_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    glGenFramebuffers(1, &_FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
 
     // Color texture
-    m_colorTexture.setData(GL_RGBA8, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    m_colorTexture.bind();
+    _colorTexture.setData(GL_RGBA8, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    _colorTexture.bind();
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                           m_colorTexture.getHandle(), 0);
+                           _colorTexture.getHandle(), 0);
 
     // Depth buffer
-    glGenRenderbuffers(1, &m_depthRbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_depthRbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_Width, m_Height);
+    glGenRenderbuffers(1, &_depthRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, _depthRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
 
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
-                              m_depthRbo);
+                              _depthRBO);
 
     GLenum drawBuffers[1] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, drawBuffers);
@@ -56,21 +56,21 @@ void fc::gl::RenderTarget::create() {
 }
 
 void fc::gl::RenderTarget::destroy() {
-    if (m_depthRbo)
-        glDeleteRenderbuffers(1, &m_depthRbo);
-    if (m_fbo)
-        glDeleteFramebuffers(1, &m_fbo);
+    if (_depthRBO)
+        glDeleteRenderbuffers(1, &_depthRBO);
+    if (_FBO)
+        glDeleteFramebuffers(1, &_FBO);
 
-    m_depthRbo = 0;
-    m_fbo = 0;
+    _depthRBO = 0;
+    _FBO = 0;
 }
 
 void fc::gl::RenderTarget::resize(int width, int height) {
-    if (width == m_Width && height == m_Height)
+    if (width == _width && height == _height)
         return;
 
-    m_Width = width;
-    m_Height = height;
+    _width = width;
+    _height = height;
 
     destroy();
     create();

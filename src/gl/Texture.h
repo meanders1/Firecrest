@@ -7,26 +7,26 @@ namespace fc::gl {
 
 template <GLenum Dimension> class Texture {
 protected:
-    GLuint m_Handle;
+    GLuint _handle;
 
 public:
-    Texture() { glGenTextures(1, &m_Handle); }
+    Texture() { glGenTextures(1, &_handle); }
 
     ~Texture() {
-        if (m_Handle != 0) {
-            glDeleteTextures(1, &m_Handle);
+        if (_handle != 0) {
+            glDeleteTextures(1, &_handle);
         }
     }
 
     // move assignment
     Texture& operator=(Texture&& other) {
-        std::swap(m_Handle, other.m_Handle);
+        std::swap(_handle, other._handle);
         return *this;
     }
     // move constructor
     Texture(Texture&& other) {
-        m_Handle = other.m_Handle;
-        other.m_Handle = 0;
+        _handle = other._handle;
+        other._handle = 0;
     }
 
     Texture(const Texture&) = delete;
@@ -34,12 +34,12 @@ public:
 
     void bind(size_t slot) const {
         glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(slot));
-        glBindTexture(Dimension, m_Handle);
+        glBindTexture(Dimension, _handle);
     }
-    inline void bind() const { glBindTexture(Dimension, m_Handle); }
+    inline void bind() const { glBindTexture(Dimension, _handle); }
     static void unbind() { glBindTexture(Dimension, 0); }
 
-    inline GLuint getHandle() const { return m_Handle; }
+    inline GLuint getHandle() const { return _handle; }
 
 protected:
     virtual glm::uvec3 size() const = 0;

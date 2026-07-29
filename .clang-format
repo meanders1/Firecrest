@@ -11,10 +11,14 @@ AlignTrailingComments: true
 BreakBeforeBinaryOperators: All
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 
+BreakTemplateDeclarations: Yes
+
 BraceWrapping:
   AfterClass: true
   AfterFunction: true
   AfterNamespace: true
   AfterControlStatement: true
+
+BreakBeforeBraces: Stroustrup
 
 ColumnLimit: 100

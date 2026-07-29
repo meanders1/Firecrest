@@ -6,18 +6,45 @@
 
 namespace fc::gl {
 
+struct VertexArrayHandle {
+    GLuint id = 0;
+
+    VertexArrayHandle() { glGenVertexArrays(1, &id); }
+
+    ~VertexArrayHandle()
+    {
+        if (id)
+            glDeleteVertexArrays(1, &id);
+    }
+
+    VertexArrayHandle(const VertexArrayHandle&) = delete;
+    VertexArrayHandle& operator=(const VertexArrayHandle&) = delete;
+
+    VertexArrayHandle(VertexArrayHandle&& other) noexcept : id(other.id) { other.id = 0; }
+
+    VertexArrayHandle& operator=(VertexArrayHandle&& other) noexcept
+    {
+        if (this != &other) {
+            if (id)
+                glDeleteVertexArrays(1, &id);
+            id = other.id;
+            other.id = 0;
+        }
+        return *this;
+    }
+
+    bool valid() const { return id != 0; }
+};
+
 class VertexArray {
 private:
-    GLuint m_Handle;
+    VertexArrayHandle _handle;
 
 public:
-    VertexArray();
-    ~VertexArray();
+    VertexArray() = default;
 
-    // move assignment
-    VertexArray& operator=(VertexArray&& other);
-    // move constructor
-    VertexArray(VertexArray&& other);
+    VertexArray& operator=(VertexArray&& other) noexcept = default;
+    VertexArray(VertexArray&& other) noexcept = default;
 
     VertexArray(const VertexArray&) = delete;
     VertexArray& operator=(const VertexArray&) = delete;
@@ -27,6 +54,8 @@ public:
 
     void bind() const;
     void unbind() const;
+
+    const VertexArrayHandle& handle() const { return _handle; }
 };
 
 } // namespace fc::gl
