@@ -6,8 +6,8 @@ namespace fc {
 
 class Random {
 private:
-    std::mt19937 rng;
-    static std::mt19937 staticRNG;
+    std::mt19937 _rng;
+    static std::mt19937 _staticRNG;
 
 public:
     Random();

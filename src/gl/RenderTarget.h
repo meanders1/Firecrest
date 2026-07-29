@@ -7,12 +7,12 @@ namespace fc::gl {
 
 class RenderTarget {
 private:
-    GLuint m_fbo = 0;
-    GLuint m_depthRbo = 0;
-    Texture2D m_colorTexture;
+    GLuint _FBO = 0;
+    GLuint _depthRBO = 0;
+    Texture2D _colorTexture;
 
-    int m_Width = 0;
-    int m_Height = 0;
+    int _width = 0;
+    int _height = 0;
 
 public:
     RenderTarget(int width, int height);
@@ -28,9 +28,9 @@ public:
     void resize(int width, int height);
     void clear(float r, float g, float b, float a = 1.0f) const;
 
-    Texture2D& texture() { return m_colorTexture; }
-    int width() const { return m_Width; }
-    int height() const { return m_Height; }
+    Texture2D& texture() { return _colorTexture; }
+    int width() const { return _width; }
+    int height() const { return _height; }
 
 private:
     void create();

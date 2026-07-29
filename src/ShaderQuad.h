@@ -1,24 +1,33 @@
 #pragma once
 
 #include "Element.h"
-#include "gl/IndexBuffer.h"
 #include "gl/Shader.h"
-#include "gl/VertexArray.h"
-#include "gl/VertexBuffer.h"
-#include "gl/VertexBufferLayout.h"
+#include "gl/Shape.h"
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace fc {
 class ShaderQuad : public Element {
+private:
+    struct Vertex {
+        glm::vec2 position;
+
+        Vertex(float x, float y) : position(x, y) {}
+
+        static gl::VertexBufferLayout layout()
+        {
+            gl::VertexBufferLayout l;
+            l.push(GL_FLOAT, 2);
+            return l;
+        }
+    };
+
 public:
     gl::Shader shader;
 
     std::function<void(gl::Shader&)> beforeRender;
 
 private:
-    gl::VertexArray m_VAO;
-    gl::VertexBuffer m_VBO;
-    gl::IndexBuffer m_IBO;
+    gl::Shape<Vertex> _shape;
 
 public:
     /// @param alignment The alignment of the quad.
@@ -32,7 +41,8 @@ public:
     /// space
     ShaderQuad(alignment::ElementAlignment alignment, const std::string& shaderCode,
                std::function<void(gl::Shader&)> beforeRender)
-        : Element(alignment), beforeRender(beforeRender) {
+        : Element(alignment), beforeRender(beforeRender)
+    {
         const std::string vertexShader = R"(
                 #version 330 core
                 layout(location = 0) in vec2 aPos;
@@ -55,35 +65,25 @@ public:
         shader.addStageSource(GL_FRAGMENT_SHADER, shaderCode);
         shader.link();
 
-        m_VAO.bind();
-
-        gl::VertexBufferLayout layout;
-        layout.push(GL_FLOAT, 2); // aPos
-
-        m_VAO.addBuffer(m_VBO, layout);
-        m_VAO.addBuffer(m_IBO);
-
-        m_VAO.unbind();
-        m_VBO.unbind();
-        m_IBO.unbind();
-
-        const float vertices[] = {
-            0.0f, 0.0f, // bottom left
-            1.0f, 0.0f, // bottom right
-            1.0f, 1.0f, // top right
-            0.0f, 1.0f  // top left
+        std::vector<Vertex> vertices = {
+            {0.0f, 0.0f}, // bottom left
+            {1.0f, 0.0f}, // bottom right
+            {1.0f, 1.0f}, // top right
+            {0.0f, 1.0f}  // top left
         };
 
-        GLuint indices[] = {0, 1, 2, 2, 3, 0};
+        std::vector<GLuint> indices = {0, 1, 2, 2, 3, 0};
 
-        m_VBO.setData(vertices, sizeof(vertices), GL_STATIC_DRAW);
-        m_IBO.setIndices(indices, sizeof(indices) / sizeof(GLuint));
+        _shape.setVertices(vertices, indices, GL_STATIC_DRAW);
     }
 
     ShaderQuad(alignment::ElementAlignment alignment, const std::string& shaderCode)
-        : ShaderQuad(alignment, shaderCode, nullptr) {}
+        : ShaderQuad(alignment, shaderCode, nullptr)
+    {
+    }
 
-    void render(const Window& window, time::Duration delta) override {
+    void render(const Window& window, time::Duration delta) override
+    {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -104,12 +104,12 @@ public:
         transform = glm::scale(transform, glm::vec3(getPixelSize(), 1.0f));
         shader.setUniformMat4f("transform", transform);
 
-        m_VAO.bind();
-        m_IBO.bind();
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_IBO.getCount()), GL_UNSIGNED_INT,
+        _shape.vao.bind();
+        _shape.ibo.bind();
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_shape.ibo.getCount()), GL_UNSIGNED_INT,
                        nullptr);
-        m_VAO.unbind();
-        m_IBO.unbind();
+        _shape.vao.unbind();
+        _shape.ibo.unbind();
     }
 };
 } // namespace fc

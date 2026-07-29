@@ -143,9 +143,9 @@ public:
     ModelHandle loadModel(gl::Model&& model, const std::string& path);
 
 private:
-    std::unordered_map<TextureKey, std::weak_ptr<gl::Texture2D>> textures;
-    std::unordered_map<ShaderKey, std::weak_ptr<gl::Shader>> shaders;
-    std::unordered_map<MeshKey, std::weak_ptr<gl::Mesh>> meshes;
-    std::unordered_map<ModelKey, std::weak_ptr<gl::Model>> models;
+    std::unordered_map<TextureKey, std::weak_ptr<gl::Texture2D>> _textures;
+    std::unordered_map<ShaderKey, std::weak_ptr<gl::Shader>> _shaders;
+    std::unordered_map<MeshKey, std::weak_ptr<gl::Mesh>> _meshes;
+    std::unordered_map<ModelKey, std::weak_ptr<gl::Model>> _models;
 };
 } // namespace fc::res

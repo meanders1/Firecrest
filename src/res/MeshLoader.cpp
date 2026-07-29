@@ -213,7 +213,8 @@ namespace fc {
 namespace res {
 using namespace utils;
 
-static void trim(std::vector<std::string>& vec) {
+static void trim(std::vector<std::string>& vec)
+{
     for (std::string& str : vec) {
         utils::trim(str);
     }
@@ -225,7 +226,8 @@ static void trim(std::vector<std::string>& vec) {
 // returns -1 if no match is found, else returns the index of the first match
 template <typename T, typename F>
 static int64_t findEqual(const std::vector<T>& vec, const T& obj, F&& checkFunction, int max,
-                         float searchCoverage = 0.1) {
+                         float searchCoverage = 0.1)
+{
 
     int min = static_cast<int>((1 - searchCoverage) * vec.size());
     // Keep max within bounds of vec
@@ -241,13 +243,15 @@ static int64_t findEqual(const std::vector<T>& vec, const T& obj, F&& checkFunct
 }
 
 static void addVertex(std::vector<gl::Vertex3D>& vertices, std::vector<GLuint>& indices,
-                      gl::Vertex3D& vertex) {
+                      gl::Vertex3D& vertex)
+{
     vertices.push_back(vertex);
     indices.push_back(static_cast<GLuint>(vertices.size() - 1));
 }
 
 static std::vector<GLuint> createIndices(std::vector<gl::Vertex3D>& vertices,
-                                         float vertexSearchCoverage) {
+                                         float vertexSearchCoverage)
+{
     std::vector<gl::Vertex3D> newVertices;
     std::vector<GLuint> newIndices;
     for (uint32_t i = 0; i < vertices.size(); i++) {
@@ -265,7 +269,8 @@ static std::vector<GLuint> createIndices(std::vector<gl::Vertex3D>& vertices,
 
         if (found != -1) {
             newIndices.push_back(static_cast<GLuint>(found));
-        } else {
+        }
+        else {
             newVertices.push_back(vertex);
             newIndices.push_back(static_cast<GLuint>(newVertices.size() - 1));
         }
@@ -275,7 +280,8 @@ static std::vector<GLuint> createIndices(std::vector<gl::Vertex3D>& vertices,
 }
 
 static res::MeshHandle createMesh(ResourceManager& res, std::vector<gl::Vertex3D>& vertices,
-                                  float vertexSearchCoverage) {
+                                  float vertexSearchCoverage)
+{
     std::vector<GLuint> indices = createIndices(vertices, vertexSearchCoverage);
     // Create tangents
     for (uint32_t i = 0; i < indices.size(); i += 3) {
@@ -312,7 +318,8 @@ std::unordered_map<std::string, gl::Material> loadMaterialLib(ResourceManager& r
 
 // Loads an .obj file
 ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
-                      float vertexSearchCoverage) {
+                      float vertexSearchCoverage)
+{
     std::cout << "Loading model: " << modelPath;
     time::Moment startTime = time::now();
     gl::Model model;
@@ -347,11 +354,14 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
 
         if (tokens[0] == "v") {
             positions.push_back({std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])});
-        } else if (tokens[0] == "vn") {
+        }
+        else if (tokens[0] == "vn") {
             normals.push_back({std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3])});
-        } else if (tokens[0] == "vt") {
+        }
+        else if (tokens[0] == "vt") {
             texCoords.push_back({std::stof(tokens[1]), std::stof(tokens[2])});
-        } else if (tokens[0] == "f") {
+        }
+        else if (tokens[0] == "f") {
             std::vector<gl::Vertex3D> points;
 
             for (uint32_t i = 1; i < tokens.size(); i++) {
@@ -379,7 +389,8 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
                     if (!vertexData[1].empty()) {
                         const uint32_t tex = std::stoi(vertexData[1]);
                         vertex.texCoord = texCoords[tex > 0 ? tex - 1 : texCoords.size() - tex];
-                    } else {
+                    }
+                    else {
                         vertex.texCoord = glm::vec2{0, 0};
                     }
                     vertex.normal = normals[normal > 0 ? normal - 1 : normals.size() - normal];
@@ -393,7 +404,8 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
                 addVertex(vertices, indices, points[i]);
                 addVertex(vertices, indices, points[i + 1]);
             }
-        } else if (tokens[0] == "mtllib") {
+        }
+        else if (tokens[0] == "mtllib") {
             std::string path = getPath(modelPath);
 
             std::string fileName = tokens[1];
@@ -405,7 +417,8 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
 
             path += fileName;
             materials = loadMaterialLib(res, path);
-        } else if (tokens[0] == "usemtl") {
+        }
+        else if (tokens[0] == "usemtl") {
             if (tokens[1] == currentMaterial)
                 continue;
 
@@ -420,11 +433,14 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
                 indices.clear();
             }
             currentMaterial = tokens[1];
-        } else if (tokens[0] == "o") {
+        }
+        else if (tokens[0] == "o") {
             // Not planning on implementing named objects
-        } else if (tokens[0] == "s") {
+        }
+        else if (tokens[0] == "s") {
             // Maybe implement later
-        } else {
+        }
+        else {
             std::cout << "\tLine ignored: \"" << line << "\"" << std::endl;
         }
     }
@@ -433,7 +449,8 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
         res::MeshHandle mesh = createMesh(res, vertices, vertexSearchCoverage);
         if (materials.empty()) {
             model.subMeshes.push_back({mesh, gl::Material()});
-        } else {
+        }
+        else {
             model.subMeshes.push_back({mesh, materials.begin()->second});
         }
     }
@@ -445,7 +462,8 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
     // Assign correct shader
     if (model.subMeshes[0].second.diffuseTexture) {
         model.shader = texturedShader;
-    } else {
+    }
+    else {
         model.shader = nontexturedShader;
     }
 
@@ -453,8 +471,8 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
     uint32_t amtIndices = 0;
     for (auto& submesh : model.subMeshes) {
         const res::MeshHandle& mesh = submesh.first;
-        amtVertices += static_cast<uint32_t>(mesh->VBO.getSize() / sizeof(gl::Vertex3D));
-        amtIndices += static_cast<uint32_t>(mesh->IBO.getCount());
+        amtVertices += static_cast<uint32_t>(mesh->vbo.getSize() / sizeof(gl::Vertex3D));
+        amtIndices += static_cast<uint32_t>(mesh->ibo.getCount());
     }
     std::cout << "\tMesh count: " << model.subMeshes.size() << std::endl;
     std::cout << "\tAmount of vertices avoided: " << (1.0f - (float)amtVertices / amtIndices) * 100
@@ -466,7 +484,8 @@ ModelHandle loadModel(ResourceManager& res, const std::string& modelPath,
 }
 
 std::unordered_map<std::string, gl::Material> loadMaterialLib(ResourceManager& res,
-                                                              const std::string& path) {
+                                                              const std::string& path)
+{
     std::ifstream file(path);
     std::string line;
     if (!file.good()) {
@@ -494,22 +513,29 @@ std::unordered_map<std::string, gl::Material> loadMaterialLib(ResourceManager& r
         if (tokens[0] == "newmtl") {
             materials[tokens[1]] = gl::Material();
             currentMaterial = tokens[1];
-        } else if (tokens[0] == "Ka") {
+        }
+        else if (tokens[0] == "Ka") {
             materials[currentMaterial].ambientColor
                 = glm::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3]));
-        } else if (tokens[0] == "Kd") {
+        }
+        else if (tokens[0] == "Kd") {
             materials[currentMaterial].diffuseColor
                 = glm::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3]));
-        } else if (tokens[0] == "Ks") {
+        }
+        else if (tokens[0] == "Ks") {
             materials[currentMaterial].specularColor
                 = glm::vec3(std::stof(tokens[1]), std::stof(tokens[2]), std::stof(tokens[3]));
-        } else if (tokens[0] == "Ns") {
+        }
+        else if (tokens[0] == "Ns") {
             materials[currentMaterial].shininess = std::stof(tokens[1]);
-        } else if (tokens[0] == "d") {
+        }
+        else if (tokens[0] == "d") {
             materials[currentMaterial].transparency = std::stof(tokens[1]);
-        } else if (tokens[0] == "Tr") {
+        }
+        else if (tokens[0] == "Tr") {
             materials[currentMaterial].transparency = 1 - std::stof(tokens[1]);
-        } else if (tokens[0] == "map_Kd" || tokens[0] == "map_Ka") {
+        }
+        else if (tokens[0] == "map_Kd" || tokens[0] == "map_Ka") {
             std::string fileName = tokens[1];
             if (tokens.size() > 2) {
                 for (uint32_t i = 2; i < tokens.size(); i++) {
@@ -517,7 +543,8 @@ std::unordered_map<std::string, gl::Material> loadMaterialLib(ResourceManager& r
                 }
             }
             diffuseTexNames[currentMaterial] = fileName;
-        } else if (tokens[0] == "map_Ks") {
+        }
+        else if (tokens[0] == "map_Ks") {
             std::string fileName = tokens[1];
             if (tokens.size() > 2) {
                 for (uint32_t i = 2; i < tokens.size(); i++) {
@@ -525,7 +552,8 @@ std::unordered_map<std::string, gl::Material> loadMaterialLib(ResourceManager& r
                 }
             }
             specularTexNames[currentMaterial] = fileName;
-        } else if (tokens[0] == "map_Bump" || tokens[0] == "map_bump") {
+        }
+        else if (tokens[0] == "map_Bump" || tokens[0] == "map_bump") {
             std::string fileName = tokens[1];
             if (tokens.size() > 2) {
                 for (uint32_t i = 2; i < tokens.size(); i++) {
@@ -533,7 +561,8 @@ std::unordered_map<std::string, gl::Material> loadMaterialLib(ResourceManager& r
                 }
             }
             normalTexNames[currentMaterial] = fileName;
-        } else {
+        }
+        else {
             std::cout << "\tLine ignored in material file: \"" << line << "\"" << std::endl;
         }
     }

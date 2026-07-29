@@ -6,9 +6,9 @@ namespace fc::gl {
 
 class Texture2D : public Texture<GL_TEXTURE_2D> {
 private:
-    int m_Width, m_Height;
-    GLenum m_WrapMode = GL_CLAMP_TO_EDGE;
-    GLenum m_MinMagFilter = GL_LINEAR;
+    int _width, _height;
+    GLenum _wrapMode = GL_CLAMP_TO_EDGE;
+    GLenum _minMagFilter = GL_LINEAR;
 
 public:
     Texture2D();
@@ -19,8 +19,8 @@ public:
     void setData(GLint textureFormat, GLsizei width, GLsizei height, GLenum dataFormat,
                  GLenum dataType, const void* data);
 
-    inline int width() const { return m_Width; }
-    inline int height() const { return m_Height; }
+    inline int width() const { return _width; }
+    inline int height() const { return _height; }
 
     glm::uvec3 size() const override;
 };

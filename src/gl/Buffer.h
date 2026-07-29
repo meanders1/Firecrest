@@ -4,78 +4,99 @@
 
 namespace fc::gl {
 
-template <GLenum t_Type> class Buffer {
-protected:
-    GLuint m_Handle;
+struct BufferHandle {
+    GLuint id = 0;
 
-    GLsizeiptr m_Size;
+    BufferHandle() { glGenBuffers(1, &id); }
 
-public:
-    Buffer() : m_Size(0) { glGenBuffers(1, &m_Handle); }
-    ~Buffer() {
-        if (m_Handle != 0) {
-            glDeleteBuffers(1, &m_Handle);
+    ~BufferHandle()
+    {
+        if (id) {
+            glDeleteBuffers(1, &id);
         }
     }
 
-    // move assignment
-    Buffer& operator=(Buffer&& other) {
-        std::swap(m_Handle, other.m_Handle);
-        std::swap(m_Size, other.m_Size);
+    BufferHandle(const BufferHandle&) = delete;
+    BufferHandle& operator=(const BufferHandle&) = delete;
+
+    BufferHandle(BufferHandle&& o) noexcept : id(o.id) { o.id = 0; }
+
+    BufferHandle& operator=(BufferHandle&& o) noexcept
+    {
+        if (this != &o) {
+            if (id)
+                glDeleteBuffers(1, &id);
+            id = o.id;
+            o.id = 0;
+        }
         return *this;
     }
 
-    // move constructor
-    Buffer(Buffer&& other) {
-        m_Handle = other.m_Handle;
-        other.m_Handle = 0;
-        m_Size = other.m_Size;
-    }
+    bool valid() const { return id != 0; }
+};
+
+template <GLenum tType>
+class Buffer {
+protected:
+    BufferHandle _handle;
+
+    GLsizeiptr _size;
+
+public:
+    Buffer() = default;
+
+    Buffer& operator=(Buffer&& other) noexcept = default;
+    Buffer(Buffer&& other) noexcept = default;
 
     Buffer(const Buffer&) = delete;
     Buffer& operator=(const Buffer&) = delete;
 
-    inline void bind() const { glBindBuffer(t_Type, m_Handle); }
+    inline void bind() const { glBindBuffer(tType, _handle.id); }
 
-    inline void unbind() const { glBindBuffer(t_Type, 0); }
+    inline void unbind() const { glBindBuffer(tType, 0); }
 
-    void setData(const void* data) { setData(data, 0, m_Size); }
+    void setData(const void* data) { setData(data, 0, _size); }
 
-    void editData(const void* data, GLintptr offset, GLsizeiptr size) {
+    void editData(const void* data, GLintptr offset, GLsizeiptr size)
+    {
         bind();
-        glBufferSubData(t_Type, offset, size, data);
+        glBufferSubData(tType, offset, size, data);
         unbind();
     }
 
-    void setData(const void* data, GLsizeiptr size, GLenum usage) {
+    void setData(const void* data, GLsizeiptr size, GLenum usage)
+    {
         bind();
-        glBufferData(t_Type, size, data, usage);
-        m_Size = size;
+        glBufferData(tType, size, data, usage);
+        _size = size;
         unbind();
     }
 
-    void getData(void* dest) const { getData(dest, 0, m_Size); }
+    void getData(void* dest) const { getData(dest, 0, _size); }
 
-    void getData(void* dest, GLintptr offset, GLsizeiptr size) const {
+    void getData(void* dest, GLintptr offset, GLsizeiptr size) const
+    {
         bind();
-        glGetBufferSubData(t_Type, offset, size, dest);
+        glGetBufferSubData(tType, offset, size, dest);
         unbind();
     }
 
-    void* dataPointer(GLbitfield access) { return dataPointer(0, m_Size, access); }
+    void* dataPointer(GLbitfield access) { return dataPointer(0, _size, access); }
 
-    void* dataPointer(GLintptr offset, GLsizeiptr size, GLbitfield access) {
+    void* dataPointer(GLintptr offset, GLsizeiptr size, GLbitfield access)
+    {
         bind();
-        void* ptr = glMapBufferRange(t_Type, offset, size, access);
+        void* ptr = glMapBufferRange(tType, offset, size, access);
         return ptr;
     }
 
-    void close() {
-        glUnmapBuffer(t_Type);
+    void close()
+    {
+        glUnmapBuffer(tType);
         unbind();
     }
 
-    inline GLuint getHandle() const { return m_Handle; }
-    inline GLsizeiptr getSize() const { return m_Size; }
+    inline const BufferHandle& getHandle() const { return _handle; }
+    inline GLsizeiptr getSize() const { return _size; }
 };
 } // namespace fc::gl

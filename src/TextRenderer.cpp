@@ -6,14 +6,17 @@
 
 namespace fc {
 
-TextRenderer::TextRenderer(const std::string& fontPath) : _charset(fontPath) {
+TextRenderer::TextRenderer(const std::string& fontPath) : _charset(fontPath)
+{
     // Compile the MSDF shader
     const char* VERTEX_SOURCE = R"(
         #version 330 core
         layout(location = 0) in vec3 pos;
         layout(location = 1) in vec2 uv;
+
         out vec2 TexCoords;
         uniform mat4 projection;
+        
         void main() {
             gl_Position = projection * vec4(pos, 1.0);
             TexCoords = uv;
@@ -58,25 +61,27 @@ TextRenderer::TextRenderer(const std::string& fontPath) : _charset(fontPath) {
     _textShader.link();
 
     // Setup VAO/VBO
-    _vao.bind();
+    _VAO.bind();
     gl::VertexBufferLayout layout;
     layout.push(GL_FLOAT, 3); // pos
     layout.push(GL_FLOAT, 2); // uv
-    _vao.addBuffer(_vbo, layout);
-    _vbo.bind();
+    _VAO.addBuffer(_VBO, layout);
+    _VBO.bind();
     // Reserve enough space for one string (can grow dynamically if needed)
-    _vbo.setData(nullptr, sizeof(Vertex) * 1024 * 6, GL_DYNAMIC_DRAW);
-    _vao.unbind();
-    _vbo.unbind();
+    _VBO.setData(nullptr, sizeof(Vertex) * 1024 * 6, GL_DYNAMIC_DRAW);
+    _VAO.unbind();
+    _VBO.unbind();
 }
 
 void TextRenderer::renderText(const Window& window, const std::string& text, glm::vec3 pos,
-                              float scale, glm::vec4 color) {
+                              float scale, Color color)
+{
     renderText(static_cast<glm::vec2>(window.dimensions()), text, pos, scale, color);
 }
 
 void TextRenderer::renderText(glm::vec2 viewportSize, const std::string& text, glm::vec3 pos,
-                              float scale, glm::vec4 color) {
+                              float scale, Color color)
+{
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -86,11 +91,11 @@ void TextRenderer::renderText(glm::vec2 viewportSize, const std::string& text, g
 
     _textShader.bind();
     _textShader.setUniformMat4f("projection", projection);
-    _textShader.setUniform4f("textColor", color.x, color.y, color.z, color.w);
+    _textShader.setUniform4f("textColor", color.r, color.g, color.b, color.a);
     _textShader.setUniform1i("atlas", 0);
     _charset.atlas().bind(0);
 
-    _vao.bind();
+    _VAO.bind();
 
     std::vector<Vertex> vertices;
     vertices.reserve(text.size() * 6);
@@ -129,17 +134,18 @@ void TextRenderer::renderText(glm::vec2 viewportSize, const std::string& text, g
     }
 
     // Upload all vertices at once
-    _vbo.bind();
-    _vbo.editData(vertices.data(), 0, vertices.size() * sizeof(Vertex));
-    _vao.bind();
+    _VBO.bind();
+    _VBO.editData(vertices.data(), 0, vertices.size() * sizeof(Vertex));
+    _VAO.bind();
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size()));
 
-    _vao.unbind();
-    _vbo.unbind();
+    _VAO.unbind();
+    _VBO.unbind();
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-float TextRenderer::width(const std::string& text, float scale) {
+float TextRenderer::width(const std::string& text, float scale)
+{
     float x = 0;
     for (char c : text) {
         if (!std::isprint(c))
@@ -149,7 +155,8 @@ float TextRenderer::width(const std::string& text, float scale) {
     return x;
 }
 
-float TextRenderer::height(const std::string& text, float scale) {
+float TextRenderer::height(const std::string& text, float scale)
+{
     float minY = 1e6f;
     float maxY = -1e6f;
     for (char c : text) {
@@ -166,15 +173,18 @@ float TextRenderer::height(const std::string& text, float scale) {
     return maxY - minY;
 }
 
-float TextRenderer::lineHeight(float scale) {
+float TextRenderer::lineHeight(float scale)
+{
     return _charset.lineHeight() * scale;
 }
 
-float TextRenderer::descenderHeight(float scale) {
+float TextRenderer::descenderHeight(float scale)
+{
     return _charset.descender() * scale;
 }
 
-float TextRenderer::ascenderHeight(float scale) {
+float TextRenderer::ascenderHeight(float scale)
+{
     return _charset.ascender() * scale;
 }
 

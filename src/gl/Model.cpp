@@ -6,7 +6,8 @@
 
 namespace fc::gl {
 
-void Model::render(const Window& window, const Camera& camera, const Light& light) {
+void Model::render(const Window& window, const Camera& camera, const Light& light)
+{
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
@@ -27,7 +28,7 @@ void Model::render(const Window& window, const Camera& camera, const Light& ligh
     shader->setUniform3fv("u_CamPos", glm::value_ptr(cameraPos));
     for (auto& [mesh, material] : subMeshes) {
 
-        mesh->VAO.bind();
+        mesh->vao.bind();
 
         shader->setUniform1f("u_Material.shininess", material.shininess);
         shader->setUniform1f("u_Material.transparency", material.transparency);
@@ -35,7 +36,8 @@ void Model::render(const Window& window, const Camera& camera, const Light& ligh
         if (material.diffuseTexture) {
             material.diffuseTexture->bind(1);
             shader->setUniform1i("u_Material.diffuseTex", 1);
-        } else {
+        }
+        else {
             shader->setUniform3fv("u_Material.ambientColor", &material.ambientColor[0]);
             shader->setUniform3fv("u_Material.diffuseColor", &material.diffuseColor[0]);
             // shader.setUniform1i("u_Material.diffuseTex", 0);
@@ -45,7 +47,8 @@ void Model::render(const Window& window, const Camera& camera, const Light& ligh
             material.specularMap->bind(2);
             shader->setUniform1i("u_Material.specularTex", 2);
             shader->setUniform1i("u_Material.useSpecularTex", true);
-        } else {
+        }
+        else {
             if (shader->uniformExists("u_Material.useSpecularTex")) {
                 shader->setUniform1i("u_Material.useSpecularTex", false);
             }
@@ -69,19 +72,21 @@ void Model::render(const Window& window, const Camera& camera, const Light& ligh
 
         shader->setUniform4fv("u_Material.overrideColor", &material.overrideColor[0]);
 
-        GLsizei amtIndices = mesh->IBO.getCount();
-        mesh->IBO.bind();
+        GLsizei amtIndices = mesh->ibo.getCount();
+        mesh->ibo.bind();
         glDrawElements(GL_TRIANGLES, amtIndices, GL_UNSIGNED_INT, nullptr);
     }
 }
 
-Model& Model::operator=(Model&& other) {
+Model& Model::operator=(Model&& other)
+{
     std::swap(shader, other.shader);
     subMeshes.swap(other.subMeshes);
     return *this;
 }
 
-Model::Model(Model&& other) {
+Model::Model(Model&& other)
+{
     shader = std::move(other.shader);
     subMeshes = std::move(other.subMeshes);
 }

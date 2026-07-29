@@ -3,7 +3,8 @@
 #include "msdf-atlas-gen/msdf-atlas-gen.h"
 #include <stdexcept>
 
-fc::Charset::Charset(const std::string& fontFile) {
+fc::Charset::Charset(const std::string& fontFile)
+{
 
     const double pixelSize = 32.0;
 
@@ -64,7 +65,7 @@ fc::Charset::Charset(const std::string& fontFile) {
 
     for (const msdf_atlas::GlyphGeometry& g : glyphs) {
         char c = static_cast<char>(g.getCodepoint());
-        if (c < 0 || c >= 128)
+        if (c < 0 || c > 127)
             continue;
 
         double l, b, r, t;
@@ -95,22 +96,27 @@ fc::Charset::Charset(const std::string& fontFile) {
     msdfgen::deinitializeFreetype(ft);
 }
 
-const fc::Charset::Glyph& fc::Charset::glyph(char c) const {
+const fc::Charset::Glyph& fc::Charset::glyph(char c) const
+{
     return _glyphs.at((unsigned char)c);
 }
 
-const fc::gl::Texture2D& fc::Charset::atlas() const {
+const fc::gl::Texture2D& fc::Charset::atlas() const
+{
     return _atlas;
 }
 
-float fc::Charset::ascender() const {
+float fc::Charset::ascender() const
+{
     return _ascender;
 }
 
-float fc::Charset::descender() const {
+float fc::Charset::descender() const
+{
     return _descender;
 }
 
-float fc::Charset::lineHeight() const {
+float fc::Charset::lineHeight() const
+{
     return _lineHeight;
 }

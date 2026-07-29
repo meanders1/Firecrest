@@ -4,7 +4,8 @@
 namespace fc {
 class VerticalCenterer : public Container {
 public:
-    VerticalCenterer() : Container(alignment::ElementAlignment()) {
+    VerticalCenterer() : Container(alignment::ElementAlignment())
+    {
         this->alignment.width = [this](float parent1, float parent2) -> float {
             float minX = INFINITY;
             float maxX = 0;
@@ -22,7 +23,8 @@ public:
         };
     }
 
-    virtual void childCreated(fiv::ID id) override {
+    virtual void childCreated(fiv::ID id) override
+    {
         auto& child = children()[id];
         child->alignment.y = [id, this](float parent1, float parent2) -> float {
             const float height = children()[id]->getPixelSize().y;
@@ -31,7 +33,8 @@ public:
     }
 
     virtual glm::vec2
-    calculateChildPixelSize(const alignment::ElementAlignment& childAlignment) const {
+    calculateChildPixelSize(const alignment::ElementAlignment& childAlignment) const override
+    {
         return childAlignment.getPixelSize(parent().getPixelSize());
     }
 };

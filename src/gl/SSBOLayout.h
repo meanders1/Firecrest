@@ -7,29 +7,29 @@ namespace fc::gl {
 
 class SSBOComponent {
 private:
-    GLsizeiptr m_ElementSize; // The number of bytes per element
-    GLuint m_Count;           // The number of elements
-    bool m_FixedSize;
+    GLsizeiptr _elementSize; // The number of bytes per element
+    GLuint _count;           // The number of elements
+    bool _fixedSize;
 
 public:
     SSBOComponent(GLsizeiptr elementSize, GLuint count, bool isFixedSize)
-        : m_ElementSize(elementSize), m_Count(count), m_FixedSize(isFixedSize) {
+        : _elementSize(elementSize), _count(count), _fixedSize(isFixedSize) {
         if (count < 0)
-            m_FixedSize = false;
+            _fixedSize = false;
     }
 
-    inline GLsizeiptr getSize() const { return m_Count * m_ElementSize; }
+    inline GLsizeiptr getSize() const { return _count * _elementSize; }
 
-    inline GLuint getCount() const { return m_Count; }
+    inline GLuint getCount() const { return _count; }
 
-    inline bool isFixedSize() const { return m_FixedSize; }
+    inline bool isFixedSize() const { return _fixedSize; }
 
     // Returns true if the size was changed, else false.
     bool resize(GLuint count) {
-        if (!m_FixedSize) {
-            GLuint oldCount = m_Count;
-            m_Count = count;
-            return oldCount != m_Count;
+        if (!_fixedSize) {
+            GLuint oldCount = _count;
+            _count = count;
+            return oldCount != _count;
         }
         return false;
     }

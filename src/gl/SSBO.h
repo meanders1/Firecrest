@@ -21,6 +21,9 @@ public:
     SSBO(const SSBO&) = delete;
     SSBO& operator=(const SSBO&) = delete;
 
+    SSBO(SSBO&&) noexcept = default;
+    SSBO& operator=(SSBO&&) noexcept = default;
+
     void* dataPointer(GLuint index, GLbitfield access);
 
     void getData(void* dest, GLuint index);
