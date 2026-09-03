@@ -3,7 +3,7 @@
 ## Text
 
 - [ ] Text: Make text selection with mouse work
-- [ ] TextInput: Make hotkeys work (Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+A, etc.)
+- [x] TextInput: Make hotkeys work (Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+A, etc.)
 - [ ] Support Unicode
 - [ ] Emojis
 - [x] Signed distance fields for text (FT_RENDER_MODE_SDF)?
