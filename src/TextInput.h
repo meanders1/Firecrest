@@ -209,6 +209,8 @@ public:
                 std::string str = text.text;
                 text.text
                     = str.substr(0, _cursorPosition) + clipboard + str.substr(_cursorPosition);
+                
+                _cursorPosition += strlen(clipboard);
                 break;
             }
 
