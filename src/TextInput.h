@@ -1,18 +1,24 @@
 #pragma once
 
 #include "Scrollable.h"
+#include <algorithm>
+#include <cctype>
 
 namespace fc {
 class TextInput : public Scrollable {
 public:
     Text& text;
 
+    Color backgroundColor;
+    Color selectionColor = Color(0.00f, 0.46f, 0.82f, 0.8f);
+
 private:
     int32_t _cursorPosition = 0;
+    int32_t _selectionAnchor = 0;
+
     int _cursorBlinkCounter = 0;
     bool _showCursor = false;
     ShapeRenderer2D& _renderer;
-    Color _backgroundColor;
 
 public:
     TextInput(alignment::ElementAlignment alignment, Color backgroundColor, Color textColor,
@@ -21,10 +27,23 @@ public:
         : Scrollable(alignment, boxRenderer),
           text(createChild<Text>(alignment, textColor, textSize, text, textRenderer)),
           _renderer(boxRenderer),
-          _backgroundColor(backgroundColor)
+          backgroundColor(backgroundColor)
     {
         focusable = true;
         this->text.wrapTightly = true;
+    }
+
+    int32_t selectionStart() const { return std::min(_selectionAnchor, _cursorPosition); }
+    int32_t selectionEnd() const { return std::max(_selectionAnchor, _cursorPosition); }
+    bool hasSelection() const { return selectionStart() != selectionEnd(); }
+    std::string selectedText() const
+    {
+        return text.text.substr(selectionStart(), selectionEnd() - selectionStart());
+    }
+    void selectAll()
+    {
+        _selectionAnchor = 0;
+        _cursorPosition = static_cast<int32_t>(text.text.size());
     }
 
     virtual void onLetterTyped(Input& input, input::UnicodeCodePoint letter) override
@@ -32,19 +51,16 @@ public:
         if (static_cast<char>(letter) < 0)
             return;
 
-        std::string str = text.text;
-        std::string newStr = str.substr(0, _cursorPosition) + static_cast<char>(letter)
-                             + str.substr(_cursorPosition);
-        text.text = newStr;
-        _cursorPosition++;
+        replaceSelection(std::string(1, static_cast<char>(letter)));
     }
 
     virtual void render(const Window& window, time::Duration delta) override
     {
         const glm::vec2 size = getPixelSize();
         const glm::vec2 pos = getPixelPosition();
-        _renderer.rect(window, pos, size, _backgroundColor);
+        _renderer.rect(window, pos, size, backgroundColor);
 
+        renderSelection(window);
         Scrollable::render(window, delta);
 
         // Draw cursor
@@ -54,7 +70,7 @@ public:
             const float lineHeight = text.renderer.lineHeight(text.textSize);
             const float relY = -0.2f * lineHeight;
             _renderer.rect(window, glm::vec3(pos, 0) + glm::vec3(0, relY - getScrollOffset(), 0),
-                           {3, lineHeight}, text.color);
+                           {1.5, lineHeight}, text.color);
         }
         _cursorBlinkCounter++;
     }
@@ -66,38 +82,38 @@ public:
 
             switch (event.key) {
             case GLFW_KEY_BACKSPACE:
-                if (_cursorPosition == 0)
-                    break;
-                if (!text.text.empty()) {
-                    std::string str = text.text;
-                    std::string newStr
-                        = str.substr(0, _cursorPosition - 1) + str.substr(_cursorPosition);
-                    text.text = newStr;
-                    _cursorPosition--;
-                    clampCursor();
+                if (hasSelection()) {
+                    replaceSelection("");
+                }
+                else if (_cursorPosition > 0) {
+                    _selectionAnchor = _cursorPosition - 1;
+                    replaceSelection("");
                 }
                 break;
 
             case GLFW_KEY_DELETE:
-                if (!text.text.empty() && _cursorPosition < text.text.size()) {
-                    std::string str = text.text;
-                    std::string newStr
-                        = str.substr(0, _cursorPosition) + str.substr(_cursorPosition + 1);
-                    text.text = newStr;
+                if (hasSelection()) {
+                    replaceSelection("");
+                }
+                else if (_cursorPosition < text.text.size()) {
+                    _selectionAnchor = _cursorPosition + 1;
+                    replaceSelection("");
                 }
                 break;
 
             case GLFW_KEY_ENTER: {
-                std::string str = text.text;
-                std::string newStr
-                    = str.substr(0, _cursorPosition) + '\n' + str.substr(_cursorPosition);
-                text.text = newStr;
-                _cursorPosition++;
-                clampCursor();
+                replaceSelection("\n");
                 break;
             }
 
             case GLFW_KEY_LEFT: {
+                const bool shift_pressed = input.keyPressed(GLFW_KEY_LEFT_SHIFT)
+                                           || input.keyPressed(GLFW_KEY_RIGHT_SHIFT);
+                if (!shift_pressed && hasSelection()) {
+                    _cursorPosition = selectionStart();
+                    updateSelection(false);
+                    break;
+                }
                 if (input.keyPressed(GLFW_KEY_LEFT_CONTROL)
                     || input.keyPressed(GLFW_KEY_RIGHT_CONTROL)) {
 
@@ -124,10 +140,18 @@ public:
                 }
 
                 clampCursor();
+                updateSelection(shift_pressed);
                 break;
             }
 
             case GLFW_KEY_RIGHT: {
+                const bool shift_pressed = input.keyPressed(GLFW_KEY_LEFT_SHIFT)
+                                           || input.keyPressed(GLFW_KEY_RIGHT_SHIFT);
+                if (!shift_pressed && hasSelection()) {
+                    _cursorPosition = selectionEnd();
+                    updateSelection(false);
+                    break;
+                }
                 if (input.keyPressed(GLFW_KEY_LEFT_CONTROL)
                     || input.keyPressed(GLFW_KEY_RIGHT_CONTROL)) {
 
@@ -151,14 +175,42 @@ public:
                 }
 
                 clampCursor();
+                updateSelection(shift_pressed);
                 break;
             }
 
+            case GLFW_KEY_A:
+                if (input.keyPressed(GLFW_KEY_LEFT_CONTROL)
+                    || input.keyPressed(GLFW_KEY_RIGHT_CONTROL)) {
+                    selectAll();
+                }
+                break;
+
+            case GLFW_KEY_C:
+                if ((input.keyPressed(GLFW_KEY_LEFT_CONTROL)
+                     || input.keyPressed(GLFW_KEY_RIGHT_CONTROL))
+                    && hasSelection()) {
+                    input.setClipboard(selectedText());
+                }
+                break;
+
+            case GLFW_KEY_X:
+                if ((input.keyPressed(GLFW_KEY_LEFT_CONTROL)
+                     || input.keyPressed(GLFW_KEY_RIGHT_CONTROL))
+                    && hasSelection()) {
+                    input.setClipboard(selectedText());
+                    replaceSelection("");
+                }
+                break;
+
             case GLFW_KEY_UP: {
+                const bool shift = input.keyPressed(GLFW_KEY_LEFT_SHIFT)
+                                   || input.keyPressed(GLFW_KEY_RIGHT_SHIFT);
                 const uint32_t currentLine = cursorLineNumber();
                 // First line
                 if (currentLine == 0) {
                     _cursorPosition = 0;
+                    updateSelection(shift);
                     break;
                 }
 
@@ -179,14 +231,18 @@ public:
                     _cursorPosition = charcount + lineChars - 1;
                 }
 
+                updateSelection(shift);
                 break;
             }
 
             case GLFW_KEY_DOWN: {
+                const bool shift = input.keyPressed(GLFW_KEY_LEFT_SHIFT)
+                                   || input.keyPressed(GLFW_KEY_RIGHT_SHIFT);
                 const uint32_t line = cursorLineNumber();
                 if (line >= text.lines().size() - 1) {
                     _cursorPosition = text.text.size();
                     clampCursor();
+                    updateSelection(shift);
                     break;
                 }
 
@@ -201,16 +257,16 @@ public:
                     _cursorPosition += lineUnder.size();
                 }
                 clampCursor();
+                updateSelection(shift);
                 break;
             }
 
             case GLFW_KEY_V: {
                 const char* clipboard = input.clipboard();
-                std::string str = text.text;
-                text.text
-                    = str.substr(0, _cursorPosition) + clipboard + str.substr(_cursorPosition);
-                
-                _cursorPosition += strlen(clipboard);
+                if (input.keyPressed(GLFW_KEY_LEFT_CONTROL)
+                    || input.keyPressed(GLFW_KEY_RIGHT_CONTROL)) {
+                    replaceSelection(clipboard);
+                }
                 break;
             }
 
@@ -277,6 +333,54 @@ public:
         const float y = pos.y + getPixelSize().y - (line + 1) * lineHeight;
 
         return glm::vec2(x, y);
+    }
+
+private:
+    void updateSelection(bool extending)
+    {
+        if (!extending)
+            _selectionAnchor = _cursorPosition;
+    }
+
+    void replaceSelection(const std::string& replacement)
+    {
+        const int32_t start = selectionStart();
+        const int32_t end = selectionEnd();
+        text.text.replace(start, end - start, replacement);
+        _cursorPosition = start + static_cast<int32_t>(replacement.size());
+        _selectionAnchor = _cursorPosition;
+        clampCursor();
+    }
+
+    void renderSelection(const Window& window)
+    {
+        if (!hasSelection())
+            return;
+
+        const auto lines = text.lines();
+        const float lineHeight = text.renderer.lineHeight(text.textSize);
+        int32_t lineStart = 0;
+
+        gl::RenderRegion::push(getPixelRectangle(), gl::RenderRegion::Mode::Scissor);
+
+        for (const auto& line : lines) {
+            const int32_t lineEnd = lineStart + static_cast<int32_t>(line.first.size());
+            const int32_t spanStart = std::max(selectionStart(), lineStart);
+            const int32_t spanEnd = std::min(selectionEnd(), lineEnd);
+
+            if (spanStart < spanEnd) {
+                const auto before = line.first.substr(0, spanStart - lineStart);
+                const auto selected = line.first.substr(spanStart - lineStart, spanEnd - spanStart);
+                const float x = getPixelPosition().x + text.renderer.width(before, text.textSize);
+                const float width = text.renderer.width(selected, text.textSize);
+                const float y = line.second.y - getScrollOffset() - 0.2f * lineHeight;
+                _renderer.rect(window, {x, y}, {std::max(width, 3.0f), lineHeight}, selectionColor);
+            }
+
+            lineStart = lineEnd;
+        }
+
+        gl::RenderRegion::pop();
     }
 
     void clampCursor()
